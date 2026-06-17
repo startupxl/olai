@@ -1,0 +1,48 @@
+.palette-panel {
+  width: 480px;
+  max-width: 92%;
+  max-height: 360px;
+}
+
+.pal-input-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 14px; border-bottom: 1px solid var(--border);
+}
+.pal-search-ic { color: var(--text-tertiary); font-size: 14px; flex-shrink: 0; }
+.pal-input {
+  flex: 1; height: 44px; border: none; background: transparent;
+  outline: none; font-size: 15px; color: var(--text-primary);
+  font-family: var(--font-ui);
+}
+.pal-input::placeholder { color: var(--text-tertiary); }
+.pal-esc {
+  font-size: 10px; color: var(--text-tertiary);
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: 2px 5px; cursor: pointer; flex-shrink: 0;
+}
+
+.pal-results { max-height: 300px; overflow-y: auto; }
+
+.pal-section-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-tertiary);
+  padding: 8px 14px 4px;
+}
+
+.pal-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; cursor: pointer;
+  transition: background var(--ease-hover);
+}
+.pal-item:hover, .pal-item.focused { background: var(--bg-hover); }
+
+.pal-item-left { display: flex; align-items: center; gap: 10px; }
+.pal-item-icon { font-size: 14px; color: var(--text-secondary); width: 18px; text-align: center; }
+.pal-item-label { font-size: 13px; color: var(--text-primary); }
+.pal-item-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+.pal-item-kbd {
+  font-size: 10px; color: var(--text-tertiary);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 5px;
+}
+
+.pal-empty { padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 13px; }

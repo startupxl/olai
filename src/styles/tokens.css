@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════
+   Olai Notes — Design Tokens
+   Editorial Minimal design system
+═══════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital@1&family=JetBrains+Mono:wght@400&display=swap');
+
+:root {
+  /* Colors — light mode */
+  --bg-primary:    #F5F4F1;
+  --bg-secondary:  #EDECE8;
+  --bg-hover:      #E4E3DE;
+  --border:        #D8D7D2;
+  --text-primary:  #1A1A18;
+  --text-secondary:#6B6A65;
+  --text-tertiary: #9B9A95;
+  --accent:        #2D6A4F;
+  --accent-light:  #EAF2EE;
+  --destructive:   #C0392B;
+  --warn:          #B45309;
+  --warn-bg:       #FEF3C7;
+  --surface-overlay: rgba(245,244,241,0.97);
+  --overlay:       rgba(26,26,24,0.45);
+
+  /* Typography */
+  --font-ui:       'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif:    'Playfair Display', Georgia, serif;
+  --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Spacing scale */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+
+  /* Layout */
+  --sidebar-width:   200px;
+  --notelist-width:  280px;
+  --header-height:   40px;
+  --footer-height:   32px;
+
+  /* Motion */
+  --ease-out:        150ms ease-out;
+  --ease-hover:      80ms ease;
+  --ease-toast:      200ms ease;
+  --ease-palette:    120ms ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --bg-primary:    #18181A;
+  --bg-secondary:  #1F1F22;
+  --bg-hover:      #27272B;
+  --border:        #2E2E32;
+  --text-primary:  #E8E8E4;
+  --text-secondary:#888885;
+  --text-tertiary: #555553;
+  --accent:        #4ADE80;
+  --accent-light:  #1A2E21;
+  --surface-overlay: rgba(24,24,26,0.97);
+  --overlay:       rgba(0,0,0,0.7);
+  --warn-bg:       #292218;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

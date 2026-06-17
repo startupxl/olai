@@ -1,0 +1,213 @@
+.app-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.editor-empty {
+  align-items: center;
+  justify-content: center;
+}
+.editor-empty-state {
+  text-align: center;
+  color: var(--text-tertiary);
+  padding: 40px;
+}
+
+/* ── Toolbar ── */
+.ed-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.tb-btn {
+  min-width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px; cursor: pointer;
+  color: var(--text-secondary); font-size: 12px; font-weight: 600;
+  border: none; background: transparent; font-family: var(--font-ui);
+  padding: 0 3px; white-space: nowrap;
+  transition: background var(--ease-hover);
+}
+.tb-btn:hover, .tb-btn.active {
+  background: var(--bg-hover); color: var(--text-primary);
+}
+.tb-btn.active { color: var(--accent); }
+.tb-btn i { font-size: 14px; }
+
+.tb-sep {
+  width: 1px; height: 16px;
+  background: var(--border); margin: 0 3px; flex-shrink: 0;
+}
+.tb-text-btn {
+  font-size: 11px; color: var(--text-tertiary); cursor: pointer;
+  padding: 3px 7px; border-radius: 4px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: var(--font-ui); white-space: nowrap;
+}
+.tb-text-btn:hover { background: var(--bg-hover); }
+
+/* ── Meta row ── */
+.ed-meta-row {
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  min-height: 33px;
+  flex-wrap: wrap;
+}
+.ed-star-btn {
+  border: none; background: transparent; cursor: pointer;
+  font-size: 15px; padding: 0; line-height: 1;
+  opacity: 0.3; color: var(--accent);
+  transition: opacity var(--ease-hover);
+}
+.ed-star-btn:hover { opacity: 0.7; }
+.ed-star-btn.on { opacity: 1; color: #D4A017; }
+
+.ed-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--accent-light); color: var(--accent);
+  font-size: 11px; padding: 2px 6px; border-radius: 20px;
+}
+.ed-tag-x {
+  font-size: 10px; cursor: pointer; opacity: 0.5; margin-left: 1px;
+  transition: opacity var(--ease-hover);
+}
+.ed-tag-x:hover { opacity: 1; }
+
+.ed-tag-add {
+  font-size: 11px; color: var(--text-tertiary); background: transparent;
+  border: 1px dashed var(--border); border-radius: 20px;
+  padding: 2px 7px; cursor: pointer; font-family: var(--font-ui);
+  transition: border-color var(--ease-hover), color var(--ease-hover);
+}
+.ed-tag-add:hover { border-color: var(--accent); color: var(--accent); }
+
+.ed-tag-input {
+  font-size: 11px; border: 1px solid var(--accent); border-radius: 20px;
+  padding: 2px 7px; outline: none;
+  background: var(--bg-secondary); color: var(--text-primary);
+  font-family: var(--font-ui); width: 84px;
+}
+
+/* ── Title ── */
+.ed-title-wrap { padding: 14px 24px 0; flex-shrink: 0; }
+.ed-title {
+  font-size: 26px; font-weight: 600; color: var(--text-primary);
+  line-height: 1.3; border: none; background: transparent;
+  outline: none; width: 100%; font-family: var(--font-ui);
+  padding: 0; letter-spacing: -0.01em;
+}
+.ed-title::placeholder { color: var(--text-tertiary); }
+
+.ed-rule { height: 1px; background: var(--border); margin: 11px 24px; }
+
+/* ── Backlinks ── */
+.ed-backlinks {
+  padding: 5px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 7px;
+  flex-wrap: wrap; flex-shrink: 0; min-height: 28px;
+}
+.bl-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-tertiary);
+}
+.bl-chip {
+  font-size: 11px; background: var(--bg-secondary); color: var(--text-secondary);
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: 2px 7px; cursor: pointer;
+  transition: border-color var(--ease-hover), color var(--ease-hover);
+}
+.bl-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Canvas wrap ── */
+.ed-canvas-wrap {
+  flex: 1; overflow-y: auto; position: relative;
+}
+
+/* ── Wiki popup ── */
+.wiki-popup {
+  position: absolute;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border);
+  border-radius: 5px; z-index: 50;
+  min-width: 220px; overflow: hidden;
+}
+.wiki-item {
+  padding: 8px 12px; cursor: pointer;
+  transition: background var(--ease-hover);
+}
+.wiki-item:hover, .wiki-item.focused { background: var(--bg-hover); }
+.wiki-item-title { font-size: 13px; color: var(--text-primary); }
+.wiki-item-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* ── Rich text editor ── */
+.rich-editor {
+  min-height: 100%;
+  padding: 0 24px 32px;
+  outline: none; cursor: text;
+  font-size: 15px; line-height: 1.65;
+  color: var(--text-primary);
+  max-width: 720px;
+}
+.rich-editor:focus { outline: none; }
+
+.rich-editor h1 {
+  font-size: 22px; font-weight: 600; line-height: 1.3;
+  margin: 16px 0 8px; letter-spacing: -0.01em;
+}
+.rich-editor h2 {
+  font-size: 18px; font-weight: 600; line-height: 1.35; margin: 14px 0 6px;
+}
+.rich-editor h3 {
+  font-size: 15px; font-weight: 600; line-height: 1.4; margin: 12px 0 4px;
+}
+.rich-editor p { margin-bottom: 10px; min-height: 1.65em; }
+.rich-editor strong { font-weight: 600; }
+.rich-editor em { font-style: italic; }
+.rich-editor s { text-decoration: line-through; color: var(--text-secondary); }
+.rich-editor code {
+  font-family: var(--font-mono); font-size: 13px;
+  background: var(--bg-secondary);
+  padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border);
+}
+.rich-editor pre {
+  font-family: var(--font-mono); font-size: 13px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 4px; padding: 10px 12px; overflow-x: auto; margin: 10px 0;
+}
+.rich-editor blockquote {
+  border-left: 2px solid var(--accent);
+  padding-left: 14px; color: var(--text-secondary); margin: 10px 0;
+}
+.rich-editor ul, .rich-editor ol { padding-left: 22px; margin-bottom: 10px; }
+.rich-editor li { margin-bottom: 3px; }
+.rich-editor hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.rich-editor a {
+  color: var(--accent); text-decoration: underline; cursor: pointer;
+}
+.rich-editor .wikilink {
+  color: var(--accent); cursor: pointer;
+  border-bottom: 1px solid var(--accent); font-weight: 500;
+}
+.rich-editor .wikilink:hover { background: var(--accent-light); }
+.rich-editor .wikilink.broken {
+  color: var(--text-tertiary); border-bottom-style: dashed;
+}
+
+/* ── Footer ── */
+.ed-footer {
+  padding: 6px 24px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.ed-meta { font-size: 11px; color: var(--text-tertiary); }

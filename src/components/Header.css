@@ -1,0 +1,136 @@
+.app-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-primary);
+  flex-shrink: 0;
+  gap: 8px;
+  position: relative;
+  z-index: 20;
+}
+
+.hdr-sb-toggle {
+  width: 26px; height: 26px;
+  border: none; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-tertiary); border-radius: 4px; flex-shrink: 0;
+}
+.hdr-sb-toggle:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.app-wordmark {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+.hdr-search-wrap {
+  flex: 1;
+  max-width: 210px;
+  position: relative;
+}
+.hdr-search {
+  width: 100%; height: 26px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 24px 0 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  outline: none;
+  transition: border-color var(--ease-hover);
+}
+.hdr-search:focus { border-color: var(--accent); }
+.hdr-search::placeholder { color: var(--text-tertiary); }
+.hdr-search-ic {
+  position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+  color: var(--text-tertiary); font-size: 12px; pointer-events: none;
+}
+
+.hdr-right {
+  display: flex; align-items: center; gap: 6px; margin-left: auto;
+}
+
+.hdr-sync-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+}
+
+.hdr-icon-btn {
+  width: 26px; height: 26px;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); font-size: 13px;
+  transition: background var(--ease-hover);
+}
+.hdr-icon-btn:hover { background: var(--bg-hover); }
+
+.hdr-avatar-wrap { position: relative; }
+.hdr-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 600; color: #fff;
+  cursor: pointer;
+  transition: border-color var(--ease-hover);
+}
+.hdr-avatar:hover { border-color: var(--accent); }
+
+.dd-backdrop {
+  position: fixed; inset: 0; z-index: 99;
+}
+
+.profile-dropdown {
+  position: absolute; top: 36px; right: 0;
+  width: 240px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.pd-user {
+  padding: 13px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.pd-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: #fff; flex-shrink: 0;
+}
+.pd-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.pd-email { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+.pd-plan {
+  display: inline-block; font-size: 10px;
+  background: var(--accent-light); color: var(--accent);
+  padding: 1px 6px; border-radius: 10px; margin-top: 3px; font-weight: 500;
+}
+
+.pd-section { padding: 5px 0; border-bottom: 1px solid var(--border); }
+.pd-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px; cursor: pointer;
+  color: var(--text-secondary); font-size: 13px;
+}
+.pd-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+.pd-item i { font-size: 13px; }
+
+.pd-signout { padding: 5px 0; }
+.pd-signout-btn {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px; cursor: pointer;
+  color: var(--destructive); font-size: 13px;
+  background: none; border: none; font-family: var(--font-ui); text-align: left;
+}
+.pd-signout-btn:hover { background: var(--bg-hover); }
+.pd-signout-btn i { font-size: 13px; }
