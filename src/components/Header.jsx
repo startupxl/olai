@@ -6,7 +6,7 @@ export default function Header({
   sidebarCollapsed, onToggleSidebar,
   user, onSignOut,
   onOpenGraph, onOpenSketch, onOpenGamif,
-  onOpenIntegrations, onOpenAdmin, onOpenGdpr, onOpenPalette, isAdmin,
+  onOpenIntegrations, onOpenGdpr, onOpenPalette,
   onOpenProfile, onOpenSubscription,
   searchQuery, onSearch,
 }) {
@@ -44,11 +44,6 @@ export default function Header({
         <button className="hdr-icon-btn" onClick={onOpenIntegrations} title="Integrations">
           <i className="ti ti-plug" />
         </button>
-        {isAdmin && (
-          <button className="hdr-icon-btn" onClick={onOpenAdmin} title="Admin panel">
-            <i className="ti ti-shield" />
-          </button>
-        )}
         <button className="hdr-icon-btn" onClick={onOpenGdpr} title="Privacy & data">
           <i className="ti ti-lock" />
         </button>
@@ -86,11 +81,6 @@ export default function Header({
                   <div className="pd-item" onClick={() => { setDdOpen(false); onOpenProfile?.(); }}>
                     <i className="ti ti-user-circle" /> Profile &amp; account
                   </div>
-                  {isAdmin && (
-                    <div className="pd-item" onClick={() => { setDdOpen(false); onOpenAdmin(); }}>
-                      <i className="ti ti-shield" /> Admin panel
-                    </div>
-                  )}
                   <div className="pd-item" onClick={() => { setDdOpen(false); onOpenGdpr(); }}>
                     <i className="ti ti-lock" /> Privacy & data
                   </div>

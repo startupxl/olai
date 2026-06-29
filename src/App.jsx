@@ -8,7 +8,7 @@ import ProfilePanel       from './components/ProfilePanel.jsx';
 import SubscriptionPanel  from './components/SubscriptionPanel.jsx';
 import {
   GraphPanel, SketchPanel, GamificationPanel,
-  IntegrationsPanel, AdminPanel, GdprPanel,
+  IntegrationsPanel, GdprPanel,
   OnboardingPanel, AuthScreen,
 } from './components/Panels.jsx';
 import { useNotes }  from './hooks/useNotes.js';
@@ -46,7 +46,6 @@ export default function App() {
   const [authed,     setAuthed]     = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [userPlan,   setUserPlan]   = useState('free');
-  const [isAdmin,    setIsAdmin]    = useState(false);
 
   useEffect(() => {
     const unsub = onAuthChanged(async u => {
@@ -65,7 +64,6 @@ export default function App() {
               ? 'free'
               : (profile.plan || 'free');
           setUserPlan(effectivePlan);
-          setIsAdmin(profile.isAdmin === true);
         } catch {}
       }
     });
@@ -94,7 +92,7 @@ export default function App() {
   // ── Panels ──
   const [panels, setPanels] = useState({
     palette: false, graph: false, sketch: false,
-    gamif: false, integrations: false, admin: false,
+    gamif: false, integrations: false,
     gdpr: false, onboarding: false, profile: false, subscription: false,
   });
 
@@ -160,7 +158,6 @@ export default function App() {
       case 'sketch':       openPanel('sketch'); break;
       case 'gamif':        openPanel('gamif'); break;
       case 'integrations': openPanel('integrations'); break;
-      case 'admin':        openPanel('admin'); break;
       case 'gdpr':         openPanel('gdpr'); break;
       case 'dark':         setDark(d => !d); break;
       case 'sidebar':      setSidebarCollapsed(v => !v); break;
@@ -228,12 +225,10 @@ export default function App() {
         onOpenSketch={() => openPanel('sketch')}
         onOpenGamif={() => openPanel('gamif')}
         onOpenIntegrations={() => openPanel('integrations')}
-        onOpenAdmin={() => openPanel('admin')}
         onOpenGdpr={() => openPanel('gdpr')}
         onOpenPalette={() => openPanel('palette')}
         onOpenProfile={() => openPanel('profile')}
         onOpenSubscription={() => openPanel('subscription')}
-        isAdmin={isAdmin}
         searchQuery={searchQuery}
         onSearch={q => { setSearchQuery(q); setFilter('all'); }}
       />
@@ -329,12 +324,6 @@ export default function App() {
       <IntegrationsPanel
         open={panels.integrations}
         onClose={() => closePanel('integrations')}
-        toast={toast}
-      />
-      <AdminPanel
-        open={panels.admin}
-        onClose={() => closePanel('admin')}
-        notes={notes}
         toast={toast}
       />
       <GdprPanel
