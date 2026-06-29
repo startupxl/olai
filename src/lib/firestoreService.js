@@ -72,9 +72,10 @@ export async function getOrCreateProfile(userId) {
   return profile;
 }
 
-export async function updatePlan(userId, plan, paypalSubscriptionId = null) {
+export async function updatePlan(userId, plan, paypalSubscriptionId = null, billingCycle = null) {
   const patch = { plan, planUpdatedAt: Date.now() };
   if (paypalSubscriptionId) patch.paypalSubscriptionId = paypalSubscriptionId;
+  if (billingCycle) patch.billingCycle = billingCycle;
   await setDoc(doc(db, 'profiles', userId), patch, { merge: true });
 }
 
