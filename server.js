@@ -87,6 +87,54 @@ async function updateProfile(userId, patch) {
   await db.collection('profiles').doc(userId).set(patch, { merge: true });
 }
 
+// ── Security headers ──────────────────────────────────────────────────────────
+app.use((_req, res, next) => {
+  // HSTS — force HTTPS for 1 year (only effective once served over TLS)
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+
+  // Prevent MIME sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
+  // Disallow embedding in iframes (clickjacking protection)
+  res.setHeader('X-Frame-Options', 'DENY');
+
+  // Basic XSS filter for old browsers
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+
+  // Don't leak referrer to third parties
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // Restrict browser features
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
+
+  // Content Security Policy
+  // Allowlists: PayPal, AdSense/Google, Firebase, Google Fonts, self
+  const csp = [
+    "default-src 'self'",
+    // Scripts: self, PayPal SDK, AdSense, Firebase, Google APIs
+    "script-src 'self' 'unsafe-inline' https://www.paypal.com https://www.paypalobjects.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://apis.google.com https://www.gstatic.com",
+    // Styles: self + Google Fonts
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+    // Fonts: self + Google Fonts
+    "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
+    // Images: self + data URIs + PayPal + Google + AdSense CDNs
+    "img-src 'self' data: blob: https://*.paypal.com https://*.paypalobjects.com https://*.google.com https://*.gstatic.com https://*.googlesyndication.com",
+    // Fetch/XHR: self + Firebase + PayPal API + Google APIs
+    "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://api-m.paypal.com https://www.paypal.com https://pagead2.googlesyndication.com",
+    // Frames: PayPal checkout
+    "frame-src https://www.paypal.com https://www.sandbox.paypal.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
+    // Workers (Firestore uses a service worker)
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "upgrade-insecure-requests",
+  ].join('; ');
+  res.setHeader('Content-Security-Policy', csp);
+
+  next();
+});
+
 // ── Webhook handler ───────────────────────────────────────────────────────────
 app.use('/api/webhooks/paypal', express.raw({ type: 'application/json' }));
 

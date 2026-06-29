@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { updatePlan } from '../lib/firestoreService.js';
 
-const PAYPAL_CLIENT_ID   = import.meta.env.VITE_PAYPAL_CLIENT_ID       || 'YOUR_PAYPAL_CLIENT_ID';
-const PLAN_ID_MONTHLY    = import.meta.env.VITE_PAYPAL_PLAN_ID_MONTHLY  || 'YOUR_PLAN_ID_MONTHLY';
-const PLAN_ID_ANNUAL     = import.meta.env.VITE_PAYPAL_PLAN_ID_ANNUAL   || 'YOUR_PLAN_ID_ANNUAL';
+const PAYPAL_CLIENT_ID   = import.meta.env.VITE_PAYPAL_CLIENT_ID       || 'AW7e40ng8NMKkgeoyI1ggMc2YmOVp3puedlkjB-90qSouRCO7OeVc72RaGqifQMLllFjL9AcFjDV4sTX';
+const PLAN_ID_MONTHLY    = import.meta.env.VITE_PAYPAL_PLAN_ID_MONTHLY  || 'P-3M279991U13357141NJBENDA';
+const PLAN_ID_ANNUAL     = import.meta.env.VITE_PAYPAL_PLAN_ID_ANNUAL   || 'P-2MY17037UE460483RNJBENDI';
 
 const PRO_FEATURES = [
   { icon: '🚫', text: 'No ads — clean, distraction-free writing' },

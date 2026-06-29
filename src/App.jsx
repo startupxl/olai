@@ -46,6 +46,7 @@ export default function App() {
   const [authed,     setAuthed]     = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [userPlan,   setUserPlan]   = useState('free');
+  const [isAdmin,    setIsAdmin]    = useState(false);
 
   useEffect(() => {
     const unsub = onAuthChanged(async u => {
@@ -64,6 +65,7 @@ export default function App() {
               ? 'free'
               : (profile.plan || 'free');
           setUserPlan(effectivePlan);
+          setIsAdmin(profile.isAdmin === true);
         } catch {}
       }
     });
@@ -231,6 +233,7 @@ export default function App() {
         onOpenPalette={() => openPanel('palette')}
         onOpenProfile={() => openPanel('profile')}
         onOpenSubscription={() => openPanel('subscription')}
+        isAdmin={isAdmin}
         searchQuery={searchQuery}
         onSearch={q => { setSearchQuery(q); setFilter('all'); }}
       />
