@@ -228,11 +228,13 @@ export function SketchPanel({ open, onClose, onInsert }) {
 }
 
 /* ═══════════════════════════ GAMIFICATION ═══════════════════════════ */
-export function GamificationPanel({ open, onClose, noteCount, toast }) {
+export function GamificationPanel({ open, onClose, noteCount, toast, user }) {
   const [copied, setCopied] = useState(false);
+  const refCode = user?.uid ? user.uid.slice(0, 8) : 'xxxxxxxx';
+  const refUrl  = `https://olainotes.com/r/${refCode}`;
 
   function copyRef() {
-    navigator.clipboard.writeText('https://olainotes.app/r/ada-lv8k2').catch(() => {});
+    navigator.clipboard.writeText(refUrl).catch(() => {});
     setCopied(true); setTimeout(() => setCopied(false), 2000);
     toast('Referral link copied!');
   }
@@ -278,7 +280,7 @@ export function GamificationPanel({ open, onClose, noteCount, toast }) {
           <div className="referral-title">Invite friends, unlock Pro features</div>
           <div className="referral-sub">For every friend who signs up, you both get 1 month Pro free.</div>
           <div className="referral-link-row">
-            <input className="referral-input" value="https://olainotes.app/r/ada-lv8k2" readOnly />
+            <input className="referral-input" value={refUrl} readOnly />
             <button className="btn-primary" style={{ fontSize: 12, padding: '6px 12px' }} onClick={copyRef}>
               {copied ? 'Copied!' : 'Copy'}
             </button>
@@ -715,7 +717,7 @@ export function AuthScreen({ onAuth }) {
             </div>
           ))}
         </div>
-        <div className="auth-footer-text">© 2026 Olai Notes · Privacy · Terms</div>
+        <div className="auth-footer-text">© {new Date().getFullYear()} Olai Notes · <a href="/privacy" style={{ color: 'inherit' }}>Privacy</a> · <a href="/terms" style={{ color: 'inherit' }}>Terms</a></div>
       </div>
 
       <div className="auth-right">

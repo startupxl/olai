@@ -32,8 +32,8 @@ export default function App() {
     return unsub;
   }, []);
 
-  // ── Theme ──
-  const [dark,       setDark]       = useState(false);
+  // ── Theme — persisted to localStorage ──
+  const [dark, setDark] = useState(() => localStorage.getItem('olai-dark') === 'true');
 
   // ── Layout ──
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -61,9 +61,10 @@ export default function App() {
   function openPanel(k)  { setPanels(p => ({ ...p, [k]: true })); }
   function closePanel(k) { setPanels(p => ({ ...p, [k]: false })); }
 
-  // ── Dark mode ──
+  // ── Dark mode — sync to DOM + localStorage ──
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? 'dark' : '';
+    localStorage.setItem('olai-dark', dark);
   }, [dark]);
 
   // ── Keyboard shortcuts ──
@@ -272,6 +273,7 @@ export default function App() {
         onClose={() => closePanel('gamif')}
         noteCount={notes.filter(n => !n.deleted).length}
         toast={toast}
+        user={user}
       />
       <IntegrationsPanel
         open={panels.integrations}

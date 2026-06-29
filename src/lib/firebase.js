@@ -8,7 +8,7 @@ const firebaseConfig = {
   projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID         || 'olai-dc635',
   storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET     || 'olai-dc635.firebasestorage.app',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '748648366466',
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID || '1:748648366466:web:bc55bc8addc83ef02dcf9b',
 };
 
 export const app = initializeApp(firebaseConfig);
