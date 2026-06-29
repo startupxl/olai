@@ -69,10 +69,10 @@ export const INITIAL_NOTES = [
     title: 'Product roadmap notes',
     html: `<h2>Q3 priorities</h2>
 <ul>
-  <li>AI summarisation — Anthropic API integration</li>
-  <li>Real-time collaboration — Firebase Realtime DB</li>
-  <li>Mobile app — Expo / React Native</li>
-  <li>Desktop app — Tauri shell</li>
+  <li>Real-time collaboration</li>
+  <li>End-to-end encryption</li>
+  <li>Mobile app — Android &amp; iOS</li>
+  <li>Desktop app</li>
 </ul>
 <blockquote>MVP targets 500 beta users by August 15</blockquote>`,
     tags: ['planning', 'product'],

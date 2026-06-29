@@ -39,7 +39,7 @@ export default function PrivacyPage() {
           <li>To authenticate you and sync your notes across devices.</li>
           <li>To send essential service emails (password reset, security alerts).</li>
           <li>We do <strong>not</strong> sell your data to third parties.</li>
-          <li>We do <strong>not</strong> use your note content to train AI models without your explicit consent.</li>
+          <li>We do <strong>not</strong> use your note content for any purpose other than providing the service.</li>
         </ul>
 
         <h2 style={s.h2}>3. Data storage & security</h2>

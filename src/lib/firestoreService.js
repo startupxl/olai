@@ -61,6 +61,62 @@ export async function deleteSpace(spaceId) {
   await deleteDoc(doc(db, 'spaces', spaceId));
 }
 
+// ── Referrals ──
+
+// Reward tiers: { count, months } — months of Pro granted cumulatively
+const REFERRAL_TIERS = [
+  { count: 1, months: 1 },
+  { count: 3, months: 3 },
+  { count: 5, months: 6 },
+];
+
+export async function getReferralCount(userId) {
+  const { getDocs, query: fsQuery, collection: fsCol, where: fsWhere } = await import('firebase/firestore');
+  const snap = await getDocs(fsQuery(fsCol(db, 'profiles'), fsWhere('referredBy', '==', userId)));
+  return snap.size;
+}
+
+export async function trackReferralOnSignup(newUserId, referrerUid) {
+  if (!referrerUid || referrerUid === newUserId) return;
+  // Save referredBy on the new user's profile
+  await setDoc(doc(db, 'profiles', newUserId), { referredBy: referrerUid }, { merge: true });
+
+  // Count referrer's total referrals
+  const { getDocs, query: fsQuery, collection: fsCol, where: fsWhere } = await import('firebase/firestore');
+  const snap = await getDocs(fsQuery(fsCol(db, 'profiles'), fsWhere('referredBy', '==', referrerUid)));
+  const count = snap.size;
+
+  // Calculate total bonus months earned
+  let totalMonths = 0;
+  for (const tier of REFERRAL_TIERS) {
+    if (count >= tier.count) totalMonths = tier.months;
+  }
+
+  if (totalMonths > 0) {
+    const refProfile = (await getDoc(doc(db, 'profiles', referrerUid))).data() || {};
+    const alreadyGranted = refProfile.proMonthsGranted || 0;
+    if (totalMonths > alreadyGranted) {
+      // Grant additional months on top of any existing Pro expiry
+      const base = Math.max(Date.now(), refProfile.planExpiresAt || Date.now());
+      const extraMs = (totalMonths - alreadyGranted) * 30 * 24 * 60 * 60 * 1000;
+      await setDoc(doc(db, 'profiles', referrerUid), {
+        plan:            'pro',
+        planExpiresAt:   base + extraMs,
+        proMonthsGranted: totalMonths,
+        referralCount:   count,
+        planCancelled:   false,
+      }, { merge: true });
+    } else {
+      // Just update the count
+      await setDoc(doc(db, 'profiles', referrerUid), { referralCount: count }, { merge: true });
+    }
+  } else {
+    await setDoc(doc(db, 'profiles', referrerUid), { referralCount: count }, { merge: true });
+  }
+}
+
+export { REFERRAL_TIERS };
+
 // ── Profiles (GDPR consent etc.) ──
 
 export async function getOrCreateProfile(userId) {

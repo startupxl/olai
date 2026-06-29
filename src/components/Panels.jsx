@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { INTEGRATIONS, BADGES, MILESTONES, ONBOARDING_STEPS, htmlToMarkdown, downloadFile } from '../lib/store.js';
+import { getReferralCount, REFERRAL_TIERS } from '../lib/firestoreService.js';
 import { signInWithEmail, signUpWithEmail, signInWithGoogle, sendMagicLink, sendPasswordReset } from '../lib/firebaseAuth.js';
 import './Panels.css';
 
@@ -228,12 +229,25 @@ export function SketchPanel({ open, onClose, onInsert }) {
 }
 
 /* ═══════════════════════════ GAMIFICATION ═══════════════════════════ */
+const REWARD_LABELS = {
+  1: '1 month Pro free',
+  3: '3 months Pro free',
+  5: '6 months Pro free',
+};
+
 export function GamificationPanel({ open, onClose, noteCount, toast, user }) {
-  const [copied, setCopied] = useState(false);
-  const refCode = user?.uid ? user.uid.slice(0, 8) : 'xxxxxxxx';
-  const refUrl  = `https://olainotes.com/r/${refCode}`;
+  const [copied,    setCopied]    = useState(false);
+  const [refCount,  setRefCount]  = useState(null); // null = loading
+
+  const refUrl = user?.uid ? `https://olainotes.com/r/${user.uid}` : '';
+
+  useEffect(() => {
+    if (!open || !user?.uid) return;
+    getReferralCount(user.uid).then(setRefCount).catch(() => setRefCount(0));
+  }, [open, user?.uid]);
 
   function copyRef() {
+    if (!refUrl) return;
     navigator.clipboard.writeText(refUrl).catch(() => {});
     setCopied(true); setTimeout(() => setCopied(false), 2000);
     toast('Referral link copied!');
@@ -243,17 +257,17 @@ export function GamificationPanel({ open, onClose, noteCount, toast, user }) {
     <Overlay open={open} onClose={onClose}>
       <PanelHeader title="Achievements & referrals" onClose={onClose} />
       <div className="gamif-body">
-        {/* Streak */}
+        {/* Stats */}
         <div className="streak-row">
           <div className="streak-icon">🔥</div>
           <div>
-            <div className="streak-val">7</div>
-            <div className="streak-lbl">day streak</div>
-            <div className="streak-sub">You've written notes 7 days in a row!</div>
-          </div>
-          <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
             <div className="streak-val">{noteCount}</div>
             <div className="streak-lbl">total notes</div>
+            <div className="streak-sub">Keep writing — your knowledge graph grows with you.</div>
+          </div>
+          <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+            <div className="streak-val">{refCount ?? '—'}</div>
+            <div className="streak-lbl">referrals</div>
           </div>
         </div>
         {/* Badges */}
@@ -277,8 +291,8 @@ export function GamificationPanel({ open, onClose, noteCount, toast, user }) {
         ))}
         {/* Referral */}
         <div className="referral-box">
-          <div className="referral-title">Invite friends, unlock Pro features</div>
-          <div className="referral-sub">For every friend who signs up, you both get 1 month Pro free.</div>
+          <div className="referral-title">Invite friends, earn Pro free</div>
+          <div className="referral-sub">Share your link. When a friend signs up, you both benefit.</div>
           <div className="referral-link-row">
             <input className="referral-input" value={refUrl} readOnly />
             <button className="btn-primary" style={{ fontSize: 12, padding: '6px 12px' }} onClick={copyRef}>
@@ -286,9 +300,21 @@ export function GamificationPanel({ open, onClose, noteCount, toast, user }) {
             </button>
           </div>
           <div className="referral-rewards">
-            <div className="reward-row"><span className="reward-check">✓</span>1 referral — AI summarisation unlocked</div>
-            <div className="reward-row"><span style={{ color: 'var(--text-tertiary)' }}>○</span> 3 referrals — E2EE unlocked (need 2 more)</div>
-            <div className="reward-row"><span style={{ color: 'var(--text-tertiary)' }}>○</span> 5 referrals — 1 month Pro free</div>
+            {REFERRAL_TIERS.map(tier => {
+              const achieved = (refCount ?? 0) >= tier.count;
+              const needed   = tier.count - (refCount ?? 0);
+              return (
+                <div key={tier.count} className="reward-row">
+                  <span style={{ color: achieved ? 'var(--accent)' : 'var(--text-tertiary)' }}>
+                    {achieved ? '✓' : '○'}
+                  </span>
+                  {' '}{tier.count} {tier.count === 1 ? 'referral' : 'referrals'} — {REWARD_LABELS[tier.count]}
+                  {!achieved && refCount !== null && needed > 0 && (
+                    <span style={{ color: 'var(--text-tertiary)', fontSize: 11 }}> (need {needed} more)</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -404,7 +430,7 @@ export function AdminPanel({ open, onClose, notes, toast, isAdmin = false }) {
 
 /* ═══════════════════════════ GDPR PANEL ═══════════════════════════ */
 export function GdprPanel({ open, onClose, notes, toast }) {
-  const [toggs, setToggs] = useState({ analytics: true, crash: true, marketing: false, aiTraining: false });
+  const [toggs, setToggs] = useState({ analytics: true, crash: true, marketing: false });
   const [sections, setSections] = useState({ export: true, tracking: false, deletion: false, legal: false });
 
   function toggleSection(k) { setSections(prev => ({ ...prev, [k]: !prev[k] })); }
@@ -465,7 +491,7 @@ code{background:#f0f0ee;padding:1px 5px;border-radius:3px;}hr{border:none;border
                 )}
                 {key === 'tracking' && (
                   <>
-                    {[['analytics','Product analytics'],['crash','Crash reporting'],['marketing','Email marketing (Do Not Sell)'],['aiTraining','AI training on my notes']].map(([k,lbl]) => (
+                    {[['analytics','Product analytics'],['crash','Crash reporting'],['marketing','Email marketing (Do Not Sell)']].map(([k,lbl]) => (
                       <div key={k} className="gdpr-toggle-row">
                         <span style={{ fontSize: 12 }}>{lbl}</span>
                         <button className={`toggle${toggs[k] ? ' on' : ''}`} onClick={() => toggleTogg(k)} />

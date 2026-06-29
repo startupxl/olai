@@ -14,7 +14,7 @@ import {
 import { useNotes }  from './hooks/useNotes.js';
 import { useToast }  from './hooks/useToast.js';
 import { onAuthChanged, signOut } from './lib/firebaseAuth.js';
-import { getOrCreateProfile } from './lib/firestoreService.js';
+import { getOrCreateProfile, trackReferralOnSignup } from './lib/firestoreService.js';
 import { htmlToMarkdown, downloadFile } from './lib/store.js';
 import PrivacyPage   from './pages/PrivacyPage.jsx';
 import TermsPage     from './pages/TermsPage.jsx';
@@ -33,6 +33,12 @@ export default function App() {
   }, []);
   if (path === '/privacy') return <PrivacyPage />;
   if (path === '/terms')   return <TermsPage />;
+  // Referral link — save code then redirect to signup
+  if (path.startsWith('/r/')) {
+    const refCode = path.slice(3);
+    if (refCode) localStorage.setItem('olai-ref', refCode);
+    window.history.replaceState(null, '', '/');
+  }
   if (path !== '/')        return <NotFoundPage />;
 
   // ── Auth — driven by Firebase onAuthStateChanged ──
@@ -196,6 +202,12 @@ export default function App() {
           setAuthed(true);
           openPanel('onboarding');
           toast(`Welcome, ${u.name.split(' ')[0]}! 👋`);
+          // Apply referral if user came via a referral link
+          const refCode = localStorage.getItem('olai-ref');
+          if (refCode) {
+            trackReferralOnSignup(u.uid, refCode).catch(() => {});
+            localStorage.removeItem('olai-ref');
+          }
         }}
       />
     );
