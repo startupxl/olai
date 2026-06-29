@@ -19,7 +19,7 @@ export default function Header({
       </button>
 
       <div className="app-wordmark">
-        <img src="/logo.svg" alt="Olai Notes" className="app-logo-mark" />
+        <img src="/logo.png" alt="Olai Notes" className="app-logo-mark" />
         <span>Olai Notes</span>
       </div>
 
