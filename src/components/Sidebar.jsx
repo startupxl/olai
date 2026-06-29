@@ -42,7 +42,7 @@ export default function Sidebar({
         <div className="sb-section">
           <span className="sb-label">
             Spaces
-            <span className="sb-label-add" onClick={onOpenSpaceManager} title="Manage spaces">+</span>
+            <span className="sb-label-add" onClick={onOpenSpaceManager} data-tip="Manage spaces" data-tip-below>+</span>
           </span>
           {spaces.map(sp => {
             const spNotes = alive.filter(n => n.spaceId === sp.id);

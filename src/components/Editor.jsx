@@ -231,7 +231,7 @@ export default function Editor({
             <button
               key={item.cmd}
               className="tb-btn"
-              title={item.title}
+              data-tip={item.title}
               style={item.style}
               onMouseDown={item.onMouseDown || (e => { e.preventDefault(); execFmt(item.cmd); })}
             >
@@ -240,7 +240,7 @@ export default function Editor({
           );
         })}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
-          <button className="tb-text-btn" onMouseDown={e => { e.preventDefault(); execFmt('wikilink'); }}>⌘K</button>
+          <button className="tb-text-btn" onMouseDown={e => { e.preventDefault(); execFmt('wikilink'); }} data-tip="Insert wikilink [[">⌘K</button>
         </div>
       </div>
 
@@ -249,7 +249,7 @@ export default function Editor({
         <button
           className={`ed-star-btn${note.starred ? ' on' : ''}`}
           onClick={() => onToggleStar(note.id)}
-          title={note.starred ? 'Unstar' : 'Star'}
+          data-tip={note.starred ? 'Unstar note' : 'Star note'}
           aria-label={note.starred ? 'Unstar note' : 'Star note'}
         >★</button>
         {note.tags.map(tag => (

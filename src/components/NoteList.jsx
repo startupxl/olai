@@ -45,7 +45,7 @@ export default function NoteList({
       <section className={`app-notelist${mobileActive ? ' mobile-active' : ''}`} aria-label="Note list">
         <div className="nl-header">
           <span className="nl-title">{title}</span>
-          <button className="nl-new-btn" onClick={onNewNote} title="New note (⌘N)" aria-label="New note">
+          <button className="nl-new-btn" onClick={onNewNote} data-tip="New note (⌘N)" aria-label="New note">
             <i className="ti ti-plus" />
           </button>
         </div>

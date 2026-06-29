@@ -14,11 +14,14 @@ export default function Header({
 
   return (
     <header className="app-header">
-      <button className="hdr-sb-toggle" onClick={onToggleSidebar} title="Toggle sidebar (⌘\)">
+      <button className="hdr-sb-toggle" onClick={onToggleSidebar} data-tip="Toggle sidebar (⌘\)">
         <i className="ti ti-layout-sidebar" />
       </button>
 
-      <span className="app-wordmark">Olai Notes</span>
+      <div className="app-wordmark">
+        <img src="/logo.svg" alt="Olai Notes" className="app-logo-mark" />
+        <span>Olai Notes</span>
+      </div>
 
       <div className="hdr-search-wrap">
         <input
@@ -33,24 +36,24 @@ export default function Header({
       </div>
 
       <div className="hdr-right">
-        <span className="hdr-sync-dot" title="Synced" />
+        <span className="hdr-sync-dot" data-tip="Synced to cloud" />
 
-        <button className="hdr-icon-btn" onClick={onOpenSketch} title="Sketch canvas">
+        <button className="hdr-icon-btn" onClick={onOpenSketch} data-tip="Sketch canvas">
           <i className="ti ti-pencil" />
         </button>
-        <button className="hdr-icon-btn" onClick={onOpenGamif} title="Achievements">
+        <button className="hdr-icon-btn" onClick={onOpenGamif} data-tip="Achievements & referrals">
           <i className="ti ti-trophy" />
         </button>
-        <button className="hdr-icon-btn" onClick={onOpenIntegrations} title="Integrations">
+        <button className="hdr-icon-btn" onClick={onOpenIntegrations} data-tip="Integrations">
           <i className="ti ti-plug" />
         </button>
-        <button className="hdr-icon-btn" onClick={onOpenGdpr} title="Privacy & data">
+        <button className="hdr-icon-btn" onClick={onOpenGdpr} data-tip="Privacy & data">
           <i className="ti ti-lock" />
         </button>
-        <button className="hdr-icon-btn" onClick={onOpenGraph} title="Knowledge graph">
+        <button className="hdr-icon-btn" onClick={onOpenGraph} data-tip="Knowledge graph">
           <i className="ti ti-topology-star" />
         </button>
-        <button className="hdr-icon-btn" onClick={onToggleDark} title="Toggle dark mode">
+        <button className="hdr-icon-btn" onClick={onToggleDark} data-tip={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
           <i className={`ti ${dark ? 'ti-sun' : 'ti-moon'}`} />
         </button>
 
@@ -58,7 +61,7 @@ export default function Header({
           <button
             className="hdr-avatar"
             onClick={() => setDdOpen(v => !v)}
-            title="Account"
+            data-tip="Account"
           >
             {user?.initials || 'AL'}
           </button>

@@ -20,6 +20,9 @@
 .hdr-sb-toggle:hover { background: var(--bg-hover); color: var(--text-primary); }
 
 .app-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-family: var(--font-serif);
   font-style: italic;
   font-size: 17px;
@@ -27,6 +30,12 @@
   white-space: nowrap;
   flex-shrink: 0;
   letter-spacing: -0.01em;
+}
+.app-logo-mark {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .hdr-search-wrap {
