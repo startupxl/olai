@@ -1,10 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { formatDate, groupLabel } from '../lib/store.js';
+import AdBanner from './AdBanner.jsx';
 import './NoteList.css';
 
 export default function NoteList({
   notes, spaces, filter, searchQuery, activeNoteId, mobileActive,
   onOpenNote, onNewNote, onDuplicate, onDelete, onToggleStar, onMoveToSpace,
+  isPro = false,
 }) {
   const [ctx, setCtx] = useState({ open: false, x: 0, y: 0, noteId: null });
 
@@ -54,6 +56,7 @@ export default function NoteList({
           ) : (
             renderGrouped(filtered, activeNoteId, openCtx, onOpenNote, onToggleStar, hl)
           )}
+          <AdBanner slot="notelist" isPro={isPro} />
         </div>
       </section>
 

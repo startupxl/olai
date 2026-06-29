@@ -100,12 +100,12 @@ export const INITIAL_SPACES = [
 ];
 
 export const INTEGRATIONS = [
-  { id: 'slack',   name: 'Slack',           icon: '💬', desc: 'Send notes and snippets to Slack channels',      connected: false },
-  { id: 'clipper', name: 'Web Clipper',      icon: '📎', desc: 'Clip web pages into notes from your browser',   connected: false },
-  { id: 'gcal',    name: 'Google Calendar',  icon: '📅', desc: 'Attach calendar events to notes automatically', connected: false },
-  { id: 'notion',  name: 'Notion Import',    icon: '🗂', desc: 'Import your existing Notion pages',             connected: false },
-  { id: 'github',  name: 'GitHub',           icon: '🐙', desc: 'Link pull requests and issues to notes',         connected: false },
-  { id: 'zapier',  name: 'Zapier',           icon: '⚡', desc: 'Automate note creation from 5,000+ apps',       connected: false },
+  { id: 'slack',   name: 'Slack',           icon: '💬', desc: 'Send notes and snippets to Slack channels',      connected: false, comingSoon: true },
+  { id: 'clipper', name: 'Web Clipper',      icon: '📎', desc: 'Clip web pages into notes from your browser',   connected: false, comingSoon: true },
+  { id: 'gcal',    name: 'Google Calendar',  icon: '📅', desc: 'Attach calendar events to notes automatically', connected: false, comingSoon: true },
+  { id: 'notion',  name: 'Notion Import',    icon: '🗂', desc: 'Import your existing Notion pages',             connected: false, comingSoon: true },
+  { id: 'github',  name: 'GitHub',           icon: '🐙', desc: 'Link pull requests and issues to notes',         connected: false, comingSoon: true },
+  { id: 'zapier',  name: 'Zapier',           icon: '⚡', desc: 'Automate note creation from 5,000+ apps',       connected: false, comingSoon: true },
 ];
 
 export const BADGES = [
@@ -127,10 +127,10 @@ export const MILESTONES = [
 ];
 
 export const ONBOARDING_STEPS = [
-  { ic: '📝', title: 'Write your first note',     sub: 'Click + or press ⌘N' },
+  { ic: '📝', title: 'Write your first note',     sub: 'Click + or press ⌘N / Ctrl+N' },
   { ic: '[[', title: 'Create a wikilink',          sub: 'Type [[ in the editor' },
   { ic: '🏷', title: 'Add a tag',                 sub: 'Click "+ tag" below the title' },
-  { ic: '🔍', title: 'Search your notes',         sub: 'Click the search bar or ⌘F' },
+  { ic: '🔍', title: 'Search your notes',         sub: 'Click the search bar or ⌘K / Ctrl+K' },
   { ic: '🌙', title: 'Try dark mode',             sub: 'Click the moon icon in the header' },
   { ic: '🔒', title: 'Review privacy settings',   sub: 'Click the lock icon in the header' },
 ];

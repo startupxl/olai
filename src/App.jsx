@@ -4,6 +4,8 @@ import Sidebar       from './components/Sidebar.jsx';
 import NoteList      from './components/NoteList.jsx';
 import Editor        from './components/Editor.jsx';
 import CommandPalette from './components/CommandPalette.jsx';
+import ProfilePanel       from './components/ProfilePanel.jsx';
+import SubscriptionPanel  from './components/SubscriptionPanel.jsx';
 import {
   GraphPanel, SketchPanel, GamificationPanel,
   IntegrationsPanel, AdminPanel, GdprPanel,
@@ -12,22 +14,44 @@ import {
 import { useNotes }  from './hooks/useNotes.js';
 import { useToast }  from './hooks/useToast.js';
 import { onAuthChanged, signOut } from './lib/firebaseAuth.js';
+import { getOrCreateProfile } from './lib/firestoreService.js';
 import { htmlToMarkdown, downloadFile } from './lib/store.js';
+import PrivacyPage   from './pages/PrivacyPage.jsx';
+import TermsPage     from './pages/TermsPage.jsx';
+import NotFoundPage  from './pages/NotFoundPage.jsx';
 import './styles/globals.css';
 
 export default function App() {
   const toast = useToast();
 
+  // ── Routing ──
+  const [path, setPath] = useState(window.location.pathname);
+  useEffect(() => {
+    const handler = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []);
+  if (path === '/privacy') return <PrivacyPage />;
+  if (path === '/terms')   return <TermsPage />;
+  if (path !== '/')        return <NotFoundPage />;
+
   // ── Auth — driven by Firebase onAuthStateChanged ──
   const [user,       setUser]       = useState(null);
   const [authed,     setAuthed]     = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+  const [userPlan,   setUserPlan]   = useState('free');
 
   useEffect(() => {
-    const unsub = onAuthChanged(u => {
+    const unsub = onAuthChanged(async u => {
       setUser(u);
       setAuthed(!!u);
       setAuthLoading(false);
+      if (u) {
+        try {
+          const profile = await getOrCreateProfile(u.uid);
+          setUserPlan(profile.plan || 'free');
+        } catch {}
+      }
     });
     return unsub;
   }, []);
@@ -55,7 +79,7 @@ export default function App() {
   const [panels, setPanels] = useState({
     palette: false, graph: false, sketch: false,
     gamif: false, integrations: false, admin: false,
-    gdpr: false, onboarding: false,
+    gdpr: false, onboarding: false, profile: false, subscription: false,
   });
 
   function openPanel(k)  { setPanels(p => ({ ...p, [k]: true })); }
@@ -176,7 +200,7 @@ export default function App() {
         onToggleDark={() => setDark(d => !d)}
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={() => setSidebarCollapsed(v => !v)}
-        user={user}
+        user={{ ...user, plan: userPlan.charAt(0).toUpperCase() + userPlan.slice(1) }}
         onSignOut={() => signOut()}
         onOpenGraph={() => openPanel('graph')}
         onOpenSketch={() => openPanel('sketch')}
@@ -185,6 +209,8 @@ export default function App() {
         onOpenAdmin={() => openPanel('admin')}
         onOpenGdpr={() => openPanel('gdpr')}
         onOpenPalette={() => openPanel('palette')}
+        onOpenProfile={() => openPanel('profile')}
+        onOpenSubscription={() => openPanel('subscription')}
         searchQuery={searchQuery}
         onSearch={q => { setSearchQuery(q); setFilter('all'); }}
       />
@@ -200,6 +226,7 @@ export default function App() {
           activeNoteId={activeNoteId}
           onOpenNote={handleOpenNote}
           onOpenSpaceManager={() => {/* handled in sidebar */}}
+          isPro={userPlan === 'pro'}
         />
 
         <NoteList
@@ -215,6 +242,7 @@ export default function App() {
           onDelete={handleDelete}
           onToggleStar={toggleStar}
           onMoveToSpace={moveToSpace}
+          isPro={userPlan === 'pro'}
         />
 
         <Editor
@@ -296,6 +324,22 @@ export default function App() {
         open={panels.onboarding}
         onClose={() => closePanel('onboarding')}
         toast={toast}
+      />
+      <ProfilePanel
+        open={panels.profile}
+        onClose={() => closePanel('profile')}
+        user={user}
+        toast={toast}
+        onSignOut={() => signOut()}
+        onUserUpdate={u => setUser(u)}
+      />
+      <SubscriptionPanel
+        open={panels.subscription}
+        onClose={() => closePanel('subscription')}
+        user={user}
+        currentPlan={userPlan}
+        toast={toast}
+        onPlanUpdated={plan => setUserPlan(plan)}
       />
     </div>
   );

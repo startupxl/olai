@@ -59,6 +59,10 @@ export async function sendPasswordReset(email) {
   await sendPasswordResetEmail(auth, email);
 }
 
+export async function updateDisplayName(newName) {
+  await updateProfile(auth.currentUser, { displayName: newName });
+}
+
 export function signOut() {
   return firebaseSignOut(auth);
 }

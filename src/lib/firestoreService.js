@@ -4,7 +4,7 @@
 
 import {
   collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
-  onSnapshot, query, where,
+  getDoc, onSnapshot, query, where,
 } from 'firebase/firestore';
 import { db } from './firebase.js';
 
@@ -62,6 +62,21 @@ export async function deleteSpace(spaceId) {
 }
 
 // ── Profiles (GDPR consent etc.) ──
+
+export async function getOrCreateProfile(userId) {
+  const ref = doc(db, 'profiles', userId);
+  const snap = await getDoc(ref);
+  if (snap.exists()) return snap.data();
+  const profile = { userId, plan: 'free', gdprConsented: false };
+  await setDoc(ref, profile);
+  return profile;
+}
+
+export async function updatePlan(userId, plan, paypalSubscriptionId = null) {
+  const patch = { plan, planUpdatedAt: Date.now() };
+  if (paypalSubscriptionId) patch.paypalSubscriptionId = paypalSubscriptionId;
+  await setDoc(doc(db, 'profiles', userId), patch, { merge: true });
+}
 
 export async function saveGdprConsent(userId, consented) {
   await setDoc(

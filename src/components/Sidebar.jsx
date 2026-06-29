@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import AdBanner from './AdBanner.jsx';
 import './Sidebar.css';
 
 export default function Sidebar({
   collapsed, mobileActive, notes, spaces, filter, onSetFilter,
-  activeNoteId, onOpenNote, onOpenSpaceManager,
+  activeNoteId, onOpenNote, onOpenSpaceManager, isPro = false,
 }) {
   const [activeSpace, setActiveSpace] = useState(null);
   const allTags = [...new Set(notes.filter(n => !n.deleted).flatMap(n => n.tags))].sort();
@@ -84,6 +85,7 @@ export default function Sidebar({
           </div>
         </div>
       </div>
+      {!collapsed && <AdBanner slot="sidebar" isPro={isPro} />}
     </nav>
   );
 }

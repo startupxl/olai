@@ -298,29 +298,11 @@ export function GamificationPanel({ open, onClose, noteCount, toast, user }) {
 
 /* ═══════════════════════════ INTEGRATIONS ═══════════════════════════ */
 export function IntegrationsPanel({ open, onClose, toast }) {
-  const [ints, setInts] = useState(INTEGRATIONS.map(i => ({ ...i })));
-  const [loading, setLoading] = useState(null);
-
-  async function toggle(id) {
-    const int = ints.find(i => i.id === id);
-    if (!int) return;
-    if (int.connected) {
-      setInts(prev => prev.map(i => i.id === id ? { ...i, connected: false } : i));
-      toast(`${int.name} disconnected`, 'warn');
-    } else {
-      setLoading(id);
-      await new Promise(r => setTimeout(r, 1400));
-      setLoading(null);
-      setInts(prev => prev.map(i => i.id === id ? { ...i, connected: true } : i));
-      toast(`${int.name} connected ✓`);
-    }
-  }
-
   return (
     <Overlay open={open} onClose={onClose} wide>
       <PanelHeader title="Integrations & connected apps" onClose={onClose} />
       <div className="int-list">
-        {ints.map(int => (
+        {INTEGRATIONS.map(int => (
           <div key={int.id} className="int-item">
             <div className="int-logo">{int.icon}</div>
             <div className="int-info">
@@ -328,14 +310,7 @@ export function IntegrationsPanel({ open, onClose, toast }) {
               <div className="int-desc">{int.desc}</div>
             </div>
             <div className="int-status">
-              <div className={`int-dot${int.connected ? ' on' : ''}`} />
-              <button
-                className={`int-btn${int.connected ? ' connected' : ' connect'}`}
-                onClick={() => toggle(int.id)}
-                disabled={loading === int.id}
-              >
-                {loading === int.id ? 'Connecting…' : int.connected ? 'Disconnect' : 'Connect'}
-              </button>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 10, padding: '2px 8px', whiteSpace: 'nowrap' }}>Coming soon</span>
             </div>
           </div>
         ))}
@@ -345,126 +320,84 @@ export function IntegrationsPanel({ open, onClose, toast }) {
 }
 
 /* ═══════════════════════════ ADMIN PANEL ═══════════════════════════ */
-const MEMBERS = [
-  { name: 'Ada Lovelace', email: 'ada@acme.com',   role: 'Admin',  color: '#6366F1' },
-  { name: 'Maya R.',      email: 'maya@acme.com',   role: 'Editor', color: '#2D6A4F' },
-  { name: 'Tom K.',       email: 'tom@acme.com',    role: 'Editor', color: '#D4A017' },
-  { name: 'Priya S.',     email: 'priya@acme.com',  role: 'Viewer', color: '#C0392B' },
-];
-const AUDIT_LOG = [
-  { time: '10:42', ev: 'Note created',          user: 'Ada Lovelace' },
-  { time: '10:38', ev: 'Invited tom@acme.com',  user: 'Ada Lovelace' },
-  { time: '09:51', ev: 'E2EE enabled',          user: 'Maya R.' },
-  { time: '09:30', ev: 'Note exported',         user: 'Tom K.' },
-  { time: 'Yesterday', ev: 'SSO configured',    user: 'Ada Lovelace' },
-  { time: 'Yesterday', ev: 'Workspace created', user: 'Ada Lovelace' },
-];
-
-export function AdminPanel({ open, onClose, notes, toast }) {
+export function AdminPanel({ open, onClose, notes, toast, isAdmin = false }) {
   const [tab, setTab] = useState('overview');
-  const [members, setMembers] = useState(MEMBERS);
-  const [inviteEmail, setInviteEmail] = useState('');
   const [ssoOn, setSsoOn] = useState(false);
 
   const alive = notes.filter(n => !n.deleted);
 
   return (
     <Overlay open={open} onClose={onClose} wide>
-      <PanelHeader title="Admin panel — Acme Workspace" onClose={onClose} />
-      <div className="admin-tabs">
-        {['overview','members','sso','audit'].map(t => (
-          <button key={t} className={`admin-tab${tab === t ? ' active' : ''}`} onClick={() => setTab(t)}>
-            {t.charAt(0).toUpperCase() + t.slice(1).replace('sso','SSO / SAML')}
-          </button>
-        ))}
-      </div>
-      <div className="admin-body">
-        {tab === 'overview' && (
-          <div className="admin-pane">
-            <div className="admin-stats">
-              {[['Members', members.length], ['Notes', alive.length], ['Storage', '128 MB']].map(([l,v]) => (
-                <div key={l} className="admin-stat">
-                  <div className="admin-stat-val">{v}</div>
-                  <div className="admin-stat-lbl">{l}</div>
-                </div>
-              ))}
-            </div>
-            <div className="admin-plan-row">
-              <div><strong>Team plan</strong> · {members.length} / 10 seats · renews Jan 2027</div>
-              <button className="btn-primary" style={{ fontSize: 11, padding: '5px 10px' }}>Manage plan</button>
-            </div>
-            <div className="admin-field">
-              <label className="admin-field-label">Allowed email domains</label>
-              <input className="field-input" defaultValue="acme.com" placeholder="company.com" />
-            </div>
-          </div>
-        )}
-        {tab === 'members' && (
-          <div className="admin-pane">
-            {members.map((m, i) => (
-              <div key={i} className="admin-member-row">
-                <div className="admin-av" style={{ background: m.color }}>
-                  {m.name.split(' ').map(x => x[0]).join('')}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div className="admin-member-name">{m.name}</div>
-                  <div className="admin-member-email">{m.email}</div>
-                </div>
-                <span className="admin-role-badge">{m.role}</span>
-                <button className="admin-rm-btn" onClick={() => {
-                  setMembers(prev => prev.filter((_, j) => j !== i));
-                  toast('Member removed', 'warn');
-                }}><i className="ti ti-x" /></button>
-              </div>
-            ))}
-            <div className="admin-invite-row">
-              <input className="field-input" placeholder="Invite by email…"
-                value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { toast('Invite sent!'); setInviteEmail(''); } }}
-              />
-              <button className="btn-primary" style={{ fontSize: 12 }}
-                onClick={() => { toast('Invite sent!'); setInviteEmail(''); }}>Invite</button>
-            </div>
-          </div>
-        )}
-        {tab === 'sso' && (
-          <div className="admin-pane">
-            <div className="admin-sso-row">
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>SAML 2.0 SSO</div>
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>Single sign-on via your identity provider</div>
-              </div>
-              <button className={`toggle${ssoOn ? ' on' : ''}`} onClick={() => { setSsoOn(v => !v); toast('SSO ' + (!ssoOn ? 'enabled' : 'disabled')); }} />
-            </div>
-            {['Identity Provider Entity ID','SSO URL'].map(label => (
-              <div key={label} className="admin-field">
-                <label className="admin-field-label">{label}</label>
-                <input className="field-input" placeholder={`https://idp.acme.com/${label.includes('URL') ? 'sso/saml' : 'metadata'}`} />
-              </div>
-            ))}
-            <div className="admin-field">
-              <label className="admin-field-label">X.509 Certificate</label>
-              <textarea className="field-input" style={{ height: 70, resize: 'none' }} placeholder="-----BEGIN CERTIFICATE-----…" />
-            </div>
-            <button className="btn-primary" style={{ fontSize: 12 }} onClick={() => toast('SSO configuration saved')}>
-              Save configuration
-            </button>
-          </div>
-        )}
-        {tab === 'audit' && (
-          <div className="admin-pane">
-            {AUDIT_LOG.map((l, i) => (
-              <div key={i} className="audit-row">
-                <span className="audit-time">{l.time}</span>
-                <div>
-                  <div className="audit-ev">{l.ev}</div>
-                  <div className="audit-user">{l.user}</div>
-                </div>
-              </div>
+      <PanelHeader title="Admin panel" onClose={onClose} />
+      {!isAdmin ? (
+        <div style={{ padding: '40px 24px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>🔒</div>
+          <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', marginBottom: 8 }}>Admin access required</div>
+          <div style={{ fontSize: 12, lineHeight: 1.6 }}>You need admin privileges to view this panel.<br />Contact your workspace administrator for access.</div>
+        </div>
+      ) : (
+        <>
+          <div className="admin-tabs">
+            {['overview','members','sso','audit'].map(t => (
+              <button key={t} className={`admin-tab${tab === t ? ' active' : ''}`} onClick={() => setTab(t)}>
+                {t === 'sso' ? 'SSO / SAML' : t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
             ))}
           </div>
-        )}
-      </div>
+          <div className="admin-body">
+            {tab === 'overview' && (
+              <div className="admin-pane">
+                <div className="admin-stats">
+                  {[['Notes', alive.length], ['Storage', 'N/A']].map(([l,v]) => (
+                    <div key={l} className="admin-stat">
+                      <div className="admin-stat-val">{v}</div>
+                      <div className="admin-stat-lbl">{l}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="admin-plan-row">
+                  <div>Contact support to manage your plan.</div>
+                  <a href="mailto:support@olainotes.com" className="btn-primary" style={{ fontSize: 11, padding: '5px 10px', textDecoration: 'none' }}>Contact support</a>
+                </div>
+              </div>
+            )}
+            {tab === 'members' && (
+              <div className="admin-pane">
+                <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '16px 0' }}>Member management coming soon.</p>
+              </div>
+            )}
+            {tab === 'sso' && (
+              <div className="admin-pane">
+                <div className="admin-sso-row">
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 500 }}>SAML 2.0 SSO</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>Single sign-on via your identity provider</div>
+                  </div>
+                  <button className={`toggle${ssoOn ? ' on' : ''}`} onClick={() => { setSsoOn(v => !v); toast('SSO ' + (!ssoOn ? 'enabled' : 'disabled')); }} />
+                </div>
+                {['Identity Provider Entity ID','SSO URL'].map(label => (
+                  <div key={label} className="admin-field">
+                    <label className="admin-field-label">{label}</label>
+                    <input className="field-input" placeholder={`https://idp.example.com/${label.includes('URL') ? 'sso/saml' : 'metadata'}`} />
+                  </div>
+                ))}
+                <div className="admin-field">
+                  <label className="admin-field-label">X.509 Certificate</label>
+                  <textarea className="field-input" style={{ height: 70, resize: 'none' }} placeholder="-----BEGIN CERTIFICATE-----…" />
+                </div>
+                <button className="btn-primary" style={{ fontSize: 12 }} onClick={() => toast('SSO configuration saved')}>
+                  Save configuration
+                </button>
+              </div>
+            )}
+            {tab === 'audit' && (
+              <div className="admin-pane">
+                <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '16px 0' }}>Audit log coming soon.</p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </Overlay>
   );
 }
@@ -550,8 +483,13 @@ code{background:#f0f0ee;padding:1px 5px;border-radius:3px;}hr{border:none;border
                 )}
                 {key === 'legal' && (
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {['Privacy Policy','Terms of Service','Cookie Policy','GDPR / CCPA Rights'].map(l => (
-                      <button key={l} className="btn-secondary" style={{ fontSize: 12 }}>{l}</button>
+                    {[
+                      { label: 'Privacy Policy',    href: '/privacy' },
+                      { label: 'Terms of Service',  href: '/terms' },
+                      { label: 'Cookie Policy',     href: '/privacy#cookies' },
+                      { label: 'GDPR / CCPA Rights',href: '/privacy#gdpr' },
+                    ].map(({ label, href }) => (
+                      <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ fontSize: 12, textDecoration: 'none' }}>{label}</a>
                     ))}
                   </div>
                 )}
@@ -565,14 +503,27 @@ code{background:#f0f0ee;padding:1px 5px;border-radius:3px;}hr{border:none;border
 }
 
 /* ═══════════════════════════ ONBOARDING ═══════════════════════════ */
+const OB_KEY = 'olai-onboarding';
+function loadObDone() {
+  try { return JSON.parse(localStorage.getItem(OB_KEY)) || []; } catch { return []; }
+}
+function saveObDone(indices) {
+  localStorage.setItem(OB_KEY, JSON.stringify(indices));
+}
+
 export function OnboardingPanel({ open, onClose, toast }) {
-  const [steps, setSteps] = useState(ONBOARDING_STEPS.map(s => ({ ...s, done: false })));
+  const [steps, setSteps] = useState(() => {
+    const done = loadObDone();
+    return ONBOARDING_STEPS.map((s, i) => ({ ...s, done: done.includes(i) }));
+  });
 
   const done = steps.filter(s => s.done).length;
   const pct  = (done / steps.length) * 100;
 
   function toggleStep(i) {
-    setSteps(prev => prev.map((s, j) => j === i ? { ...s, done: !s.done } : s));
+    const next = steps.map((s, j) => j === i ? { ...s, done: !s.done } : s);
+    setSteps(next);
+    saveObDone(next.map((s, j) => s.done ? j : -1).filter(j => j >= 0));
     if (!steps[i].done) toast('Step completed!');
   }
 
@@ -599,7 +550,9 @@ export function OnboardingPanel({ open, onClose, toast }) {
       <div className="ob-footer">
         <button className="btn-secondary" style={{ fontSize: 12 }} onClick={onClose}>Skip for now</button>
         <button className="btn-primary"   style={{ fontSize: 12 }} onClick={() => {
-          setSteps(prev => prev.map(s => ({ ...s, done: true })));
+          const next = steps.map(s => ({ ...s, done: true }));
+          setSteps(next);
+          saveObDone(next.map((_, i) => i));
           setTimeout(() => { onClose(); toast('Setup complete! 🎉'); }, 300);
         }}>Finish setup</button>
       </div>

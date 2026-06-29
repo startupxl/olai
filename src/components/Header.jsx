@@ -7,6 +7,7 @@ export default function Header({
   user, onSignOut,
   onOpenGraph, onOpenSketch, onOpenGamif,
   onOpenIntegrations, onOpenAdmin, onOpenGdpr, onOpenPalette,
+  onOpenProfile, onOpenSubscription,
   searchQuery, onSearch,
 }) {
   const [ddOpen, setDdOpen] = useState(false);
@@ -80,6 +81,9 @@ export default function Header({
                   </div>
                 </div>
                 <div className="pd-section">
+                  <div className="pd-item" onClick={() => { setDdOpen(false); onOpenProfile?.(); }}>
+                    <i className="ti ti-user-circle" /> Profile &amp; account
+                  </div>
                   <div className="pd-item" onClick={() => { setDdOpen(false); onOpenAdmin(); }}>
                     <i className="ti ti-shield" /> Admin panel
                   </div>
@@ -90,6 +94,14 @@ export default function Header({
                     <i className="ti ti-trophy" /> Achievements
                   </div>
                 </div>
+                {user?.plan?.toLowerCase() !== 'pro' && (
+                  <div className="pd-section">
+                    <div className="pd-item" style={{ color: 'var(--accent)', fontWeight: 500 }}
+                      onClick={() => { setDdOpen(false); onOpenSubscription?.(); }}>
+                      <i className="ti ti-star" /> Upgrade to Pro — $7.99/mo
+                    </div>
+                  </div>
+                )}
                 <div className="pd-signout">
                   <button className="pd-signout-btn" onClick={() => { setDdOpen(false); onSignOut?.(); }}>
                     <i className="ti ti-logout" /> Sign out
