@@ -17,6 +17,16 @@
   font-size: 12px; font-weight: 500; color: var(--text-secondary);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
 }
+.nl-sb-toggle {
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px; cursor: pointer;
+  color: var(--text-secondary); border: none; background: transparent; font-size: 14px;
+  transition: background var(--ease-hover);
+  flex-shrink: 0;
+}
+.nl-sb-toggle:hover { background: var(--bg-hover); color: var(--text-primary); }
+
 .nl-new-btn {
   width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;

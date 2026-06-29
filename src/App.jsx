@@ -260,6 +260,7 @@ export default function App() {
           onDelete={handleDelete}
           onToggleStar={toggleStar}
           onMoveToSpace={moveToSpace}
+          onToggleSidebar={() => setSidebarCollapsed(v => !v)}
           isPro={userPlan === 'pro'}
         />
 

@@ -6,7 +6,7 @@ import './NoteList.css';
 export default function NoteList({
   notes, spaces, filter, searchQuery, activeNoteId, mobileActive,
   onOpenNote, onNewNote, onDuplicate, onDelete, onToggleStar, onMoveToSpace,
-  isPro = false,
+  onToggleSidebar, isPro = false,
 }) {
   const [ctx, setCtx] = useState({ open: false, x: 0, y: 0, noteId: null });
 
@@ -44,6 +44,9 @@ export default function NoteList({
     <>
       <section className={`app-notelist${mobileActive ? ' mobile-active' : ''}`} aria-label="Note list">
         <div className="nl-header">
+          <button className="nl-sb-toggle" onClick={onToggleSidebar} data-tip="Toggle sidebar (⌘\)" aria-label="Toggle sidebar">
+            <i className="ti ti-layout-sidebar" />
+          </button>
           <span className="nl-title">{title}</span>
           <button className="nl-new-btn" onClick={onNewNote} data-tip="New note (⌘N)" aria-label="New note">
             <i className="ti ti-plus" />

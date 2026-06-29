@@ -14,10 +14,6 @@ export default function Header({
 
   return (
     <header className="app-header">
-      <button className="hdr-sb-toggle" onClick={onToggleSidebar} data-tip="Toggle sidebar (⌘\)">
-        <i className="ti ti-layout-sidebar" />
-      </button>
-
       <div className="app-wordmark">
         <img src="/logo.svg" alt="Olai Notes" className="app-logo-mark" />
         <span>Olai Notes</span>
