@@ -135,6 +135,32 @@ app.use((_req, res, next) => {
   next();
 });
 
+// ── Subscription status check ─────────────────────────────────────────────────
+// Called by the client on login when planCancelled:true — if PayPal says the
+// subscription is still ACTIVE, the client restores the plan itself via updatePlan().
+app.use('/api/verify-subscription', express.json());
+
+app.post('/api/verify-subscription', async (req, res) => {
+  const { subscriptionId } = req.body || {};
+  if (!subscriptionId) return res.status(400).json({ error: 'Missing subscriptionId' });
+  if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+    return res.status(503).json({ error: 'PayPal not configured' });
+  }
+  try {
+    const token = await getPayPalToken();
+    const r = await fetch(`${PAYPAL_BASE}/v1/billing/subscriptions/${subscriptionId}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+    const data = await r.json();
+    const active = data.status === 'ACTIVE';
+    console.log(`Subscription ${subscriptionId} status: ${data.status}`);
+    res.json({ active, status: data.status });
+  } catch (err) {
+    console.error('verify-subscription error:', err.message);
+    res.status(500).json({ error: 'Failed to check subscription' });
+  }
+});
+
 // ── Webhook handler ───────────────────────────────────────────────────────────
 app.use('/api/webhooks/paypal', express.raw({ type: 'application/json' }));
 

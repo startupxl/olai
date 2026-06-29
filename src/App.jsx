@@ -14,7 +14,7 @@ import {
 import { useNotes }  from './hooks/useNotes.js';
 import { useToast }  from './hooks/useToast.js';
 import { onAuthChanged, signOut } from './lib/firebaseAuth.js';
-import { getOrCreateProfile, trackReferralOnSignup } from './lib/firestoreService.js';
+import { getOrCreateProfile, trackReferralOnSignup, updatePlan } from './lib/firestoreService.js';
 import { htmlToMarkdown, downloadFile } from './lib/store.js';
 import PrivacyPage   from './pages/PrivacyPage.jsx';
 import TermsPage     from './pages/TermsPage.jsx';
@@ -64,6 +64,23 @@ export default function App() {
               ? 'free'
               : (profile.plan || 'free');
           setUserPlan(effectivePlan);
+
+          // If plan appears cancelled, silently check PayPal — reactivate if still ACTIVE
+          if (profile.planCancelled && profile.paypalSubscriptionId) {
+            fetch('/api/verify-subscription', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ subscriptionId: profile.paypalSubscriptionId }),
+            })
+              .then(r => r.json())
+              .then(async ({ active }) => {
+                if (active) {
+                  await updatePlan(u.uid, 'pro', profile.paypalSubscriptionId, profile.billingCycle, profile.planStartedAt);
+                  setUserPlan('pro');
+                }
+              })
+              .catch(() => {}); // silent — never blocks login
+          }
         } catch {}
       }
     });
