@@ -59,7 +59,7 @@ export default function SubscriptionPanel({ open, onClose, user, currentPlan, to
       onApprove: async (data) => {
         setProcessing(true);
         try {
-          await updatePlan(user.uid, 'pro', data.subscriptionID, billing);
+          await updatePlan(user.uid, 'pro', data.subscriptionID, billing, Date.now());
           onPlanUpdated('pro');
           toast(`Upgraded to Olai Pro! Ads removed. Thank you 🎉`);
           onClose();
@@ -200,10 +200,9 @@ export default function SubscriptionPanel({ open, onClose, user, currentPlan, to
               {/* Policy notice */}
               <div style={{ marginTop: 14, padding: '10px 14px', background: 'var(--bg-secondary)', borderRadius: 6, border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.7 }}>
-                  <strong style={{ color: 'var(--text-secondary)' }}>Billing policy:</strong> All payments are final and non-refundable.
-                  {billing === 'annual'
-                    ? ' Annual plans are non-cancellable. Access continues for the full 12-month period.'
-                    : ' Monthly plans renew automatically. You may cancel before the next renewal date.'}
+                  <strong style={{ color: 'var(--text-secondary)' }}>Billing policy:</strong> You may cancel at any time from your PayPal account.
+                  {' '}All payments are final — no refunds are issued.
+                  {' '}Upon cancellation, your Pro access continues until the end of your current {billing === 'annual' ? '12-month' : 'monthly'} billing period.
                   {' '}Secure payment via PayPal. Subscription syncs instantly across web and mobile.
                 </div>
               </div>

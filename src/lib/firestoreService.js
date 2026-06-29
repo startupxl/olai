@@ -72,10 +72,16 @@ export async function getOrCreateProfile(userId) {
   return profile;
 }
 
-export async function updatePlan(userId, plan, paypalSubscriptionId = null, billingCycle = null) {
+export async function updatePlan(userId, plan, paypalSubscriptionId = null, billingCycle = null, planStartedAt = null) {
   const patch = { plan, planUpdatedAt: Date.now() };
   if (paypalSubscriptionId) patch.paypalSubscriptionId = paypalSubscriptionId;
-  if (billingCycle) patch.billingCycle = billingCycle;
+  if (billingCycle)  patch.billingCycle  = billingCycle;
+  if (planStartedAt) patch.planStartedAt = planStartedAt;
+  // planExpiresAt: end of current billing period (used when cancelled — access until this date)
+  if (planStartedAt && billingCycle) {
+    const ms = billingCycle === 'annual' ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+    patch.planExpiresAt = planStartedAt + ms;
+  }
   await setDoc(doc(db, 'profiles', userId), patch, { merge: true });
 }
 
