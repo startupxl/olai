@@ -49,7 +49,15 @@ export default function App() {
       if (u) {
         try {
           const profile = await getOrCreateProfile(u.uid);
-          setUserPlan(profile.plan || 'free');
+          // If cancelled and billing period has ended, treat as free
+          const effectivePlan =
+            profile.plan === 'pro' &&
+            profile.planCancelled &&
+            profile.planExpiresAt &&
+            Date.now() > profile.planExpiresAt
+              ? 'free'
+              : (profile.plan || 'free');
+          setUserPlan(effectivePlan);
         } catch {}
       }
     });

@@ -7,11 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "serve dist --single --listen 3000"
+    "start": "node server.js"
   },
   "dependencies": {
     "@tabler/icons-webfont": "^3.44.0",
+    "express": "^5.2.1",
     "firebase": "^12.15.0",
+    "firebase-admin": "^14.1.0",
     "lucide-react": "^0.383.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
