@@ -686,7 +686,7 @@ export function AuthScreen({ onAuth }) {
       <div className="auth-left">
         <div>
           <div className="auth-wordmark">Olai Notes</div>
-          <div className="auth-tagline">The tool thinks less<br />so you can write more.</div>
+          <div className="auth-tagline">Capture what matters.</div>
         </div>
         <div className="auth-timeline">
           {[['Wikilinks + knowledge graph','New'],['End-to-end encryption','2026'],['Real-time collaboration','2026'],['Offline-first sync','2025']].map(([txt,yr]) => (
