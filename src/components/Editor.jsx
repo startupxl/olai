@@ -3,7 +3,7 @@ import { wordCount, getBacklinks } from '../lib/store.js';
 import './Editor.css';
 
 export default function Editor({
-  note, notes, onUpdate, onToggleStar,
+  note, notes, mobileActive, onUpdate, onToggleStar,
   onAddTag, onRemoveTag,
 }) {
   const editorRef = useRef(null);
@@ -196,7 +196,7 @@ export default function Editor({
 
   if (!note) {
     return (
-      <section className="app-editor editor-empty" aria-label="Editor">
+      <section className={`app-editor editor-empty${mobileActive ? ' mobile-active' : ''}`} aria-label="Editor">
         <div className="editor-empty-state">
           <div style={{ fontSize: 32, marginBottom: 12 }}>✦</div>
           <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>No note selected</div>
@@ -207,7 +207,7 @@ export default function Editor({
   }
 
   return (
-    <section className="app-editor" aria-label="Note editor">
+    <section className={`app-editor${mobileActive ? ' mobile-active' : ''}`} aria-label="Note editor">
       {/* Toolbar */}
       <div className="ed-toolbar" role="toolbar" aria-label="Text formatting">
         {[

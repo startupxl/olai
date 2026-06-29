@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { INTEGRATIONS, BADGES, MILESTONES, ONBOARDING_STEPS, htmlToMarkdown, downloadFile } from '../lib/store.js';
+import { signInWithEmail, signUpWithEmail, signInWithGoogle, sendMagicLink, sendPasswordReset } from '../lib/firebaseAuth.js';
 import './Panels.css';
 
 /* ═══════════════════════════ SHARED ═══════════════════════════ */
@@ -28,12 +29,15 @@ export function GraphPanel({ open, onClose, notes, activeNoteId, onOpenNote }) {
   const svgRef    = useRef(null);
   const [positions, setPositions] = useState({});
 
-  function getLinks(html) {
-    const d = document.createElement('div'); d.innerHTML = html;
-    return [...d.querySelectorAll('.wikilink')].map(el => +el.dataset.target).filter(Boolean);
+  // Parse [[Title]] wikilinks from markdown body, resolve to note IDs by title
+  function getLinkedIds(note) {
+    const matches = [...(note.body || '').matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1].toLowerCase());
+    return notes
+      .filter(n => n.id !== note.id && matches.includes((n.title || '').toLowerCase()))
+      .map(n => n.id);
   }
   function getBacklinks(id) {
-    return notes.filter(n => n.id !== id && getLinks(n.html).includes(id));
+    return notes.filter(n => n.id !== id && getLinkedIds(n).includes(id));
   }
 
   useEffect(() => {
@@ -54,8 +58,9 @@ export function GraphPanel({ open, onClose, notes, activeNoteId, onOpenNote }) {
   const drawn = new Set();
   const edges = [];
   aliveNotes.forEach(n => {
-    getLinks(n.html).forEach(tid => {
-      const key = [Math.min(n.id, tid), Math.max(n.id, tid)].join('-');
+    getLinkedIds(n).forEach(tid => {
+      const ids = [n.id, tid].sort();
+      const key = ids.join('-');
       if (drawn.has(key)) return; drawn.add(key);
       const f = positions[n.id], t = positions[tid];
       if (f && t) edges.push({ x1: f.x, y1: f.y, x2: t.x, y2: t.y });
@@ -75,7 +80,7 @@ export function GraphPanel({ open, onClose, notes, activeNoteId, onOpenNote }) {
         {aliveNotes.map((n, i) => {
           const pos = positions[n.id];
           if (!pos) return null;
-          const lc = getLinks(n.html).length + getBacklinks(n.id).length;
+          const lc = getLinkedIds(n).length + getBacklinks(n.id).length;
           const sz = Math.max(26, Math.min(42, 22 + lc * 4));
           const col = colors[i % colors.length];
           return (
@@ -614,7 +619,7 @@ export function AuthScreen({ onAuth }) {
   function validate() {
     const e = {};
     if (!email || !/\S+@\S+\.\S+/.test(email)) e.email = 'Valid email required';
-    if (screen === 'signup' && !name) e.name = 'Name is required';
+    if (screen === 'signup' && !name.trim()) e.name = 'Name is required';
     if (pass.length < 6) e.pass = screen === 'signup' ? 'Min 8 characters' : 'Password required';
     setErrors(e); return Object.keys(e).length === 0;
   }
@@ -622,37 +627,68 @@ export function AuthScreen({ onAuth }) {
   async function submit() {
     if (!validate()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setLoading(false);
-    onAuth({
-      name: name || email.split('@')[0],
-      email, plan: 'Free',
-      initials: (name || email).split(' ').map(x => x[0]).join('').toUpperCase().slice(0, 2) || 'OL',
-      color: '#2D6A4F',
-    });
+    setErrors({});
+    try {
+      let user;
+      if (screen === 'signup') {
+        user = await signUpWithEmail(name, email, pass);
+      } else {
+        user = await signInWithEmail(email, pass);
+      }
+      onAuth(user);
+    } catch (err) {
+      const msg = err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'
+        ? 'Incorrect email or password'
+        : err.code === 'auth/email-already-in-use'
+        ? 'An account with this email already exists'
+        : err.message || 'Something went wrong';
+      setErrors({ form: msg });
+    } finally {
+      setLoading(false);
+    }
   }
 
-  async function handleOAuth(provider) {
+  async function handleOAuth() {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1300));
-    setLoading(false);
-    onAuth({ name: 'Ada Lovelace', email: 'ada@example.com', plan: 'Pro', initials: 'AL', color: '#6366F1' });
+    setErrors({});
+    try {
+      const user = await signInWithGoogle();
+      onAuth(user);
+    } catch (err) {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setErrors({ form: err.message || 'Google sign-in failed' });
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function sendMagic() {
     if (!/\S+@\S+\.\S+/.test(magicEmail)) { setErrors({ magic: 'Valid email required' }); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1300));
-    setLoading(false);
-    setScreen('magicsent');
+    setErrors({});
+    try {
+      await sendMagicLink(magicEmail);
+      setScreen('magicsent');
+    } catch (err) {
+      setErrors({ magic: err.message || 'Failed to send magic link' });
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function sendReset() {
     if (!email || !/\S+@\S+\.\S+/.test(email)) { setErrors({ email: 'Valid email required' }); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1300));
-    setLoading(false);
-    setScreen('resetsent');
+    setErrors({});
+    try {
+      await sendPasswordReset(email);
+      setScreen('resetsent');
+    } catch (err) {
+      setErrors({ email: err.message || 'Failed to send reset email' });
+    } finally {
+      setLoading(false);
+    }
   }
 
   const googleSvg = (
@@ -688,8 +724,9 @@ export function AuthScreen({ onAuth }) {
           <div className="auth-form">
             <div className="auth-form-title">Welcome back</div>
             <div className="auth-form-sub">Sign in to your Olai Notes account</div>
-            <button className="btn-oauth" onClick={() => handleOAuth('google')} disabled={loading}>{googleSvg} Continue with Google</button>
+            <button className="btn-oauth" onClick={handleOAuth} disabled={loading}>{googleSvg} Continue with Google</button>
             <div className="auth-divider"><div className="auth-div-line"/><span>or sign in with email</span><div className="auth-div-line"/></div>
+            {errors.form && <div className="field-error" style={{ marginBottom: 8 }}>{errors.form}</div>}
             <div className="auth-field">
               <label>Email</label>
               <input className={`field-input${errors.email ? ' error' : ''}`} type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
@@ -716,16 +753,17 @@ export function AuthScreen({ onAuth }) {
           <div className="auth-form">
             <div className="auth-form-title">Create your account</div>
             <div className="auth-form-sub">Free forever — no credit card required</div>
-            <button className="btn-oauth" onClick={() => handleOAuth('google')} disabled={loading}>{googleSvg} Sign up with Google</button>
+            <button className="btn-oauth" onClick={handleOAuth} disabled={loading}>{googleSvg} Sign up with Google</button>
             <div className="auth-divider"><div className="auth-div-line"/><span>or with email</span><div className="auth-div-line"/></div>
+            {errors.form && <div className="field-error" style={{ marginBottom: 8 }}>{errors.form}</div>}
             <div className="auth-field">
               <label>Full name</label>
               <input className={`field-input${errors.name ? ' error' : ''}`} type="text" placeholder="Ada Lovelace" value={name} onChange={e => setName(e.target.value)} />
               {errors.name && <div className="field-error">{errors.name}</div>}
             </div>
             <div className="auth-field">
-              <label>Work email</label>
-              <input className={`field-input${errors.email ? ' error' : ''}`} type="email" placeholder="ada@company.com" value={email} onChange={e => setEmail(e.target.value)} />
+              <label>Email</label>
+              <input className={`field-input${errors.email ? ' error' : ''}`} type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
               {errors.email && <div className="field-error">{errors.email}</div>}
             </div>
             <div className="auth-field">

@@ -3,7 +3,7 @@ import { formatDate, groupLabel } from '../lib/store.js';
 import './NoteList.css';
 
 export default function NoteList({
-  notes, spaces, filter, searchQuery, activeNoteId,
+  notes, spaces, filter, searchQuery, activeNoteId, mobileActive,
   onOpenNote, onNewNote, onDuplicate, onDelete, onToggleStar, onMoveToSpace,
 }) {
   const [ctx, setCtx] = useState({ open: false, x: 0, y: 0, noteId: null });
@@ -40,7 +40,7 @@ export default function NoteList({
 
   return (
     <>
-      <section className="app-notelist" aria-label="Note list">
+      <section className={`app-notelist${mobileActive ? ' mobile-active' : ''}`} aria-label="Note list">
         <div className="nl-header">
           <span className="nl-title">{title}</span>
           <button className="nl-new-btn" onClick={onNewNote} title="New note (⌘N)" aria-label="New note">

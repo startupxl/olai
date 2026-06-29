@@ -1,88 +1,160 @@
-import { useState, useCallback } from 'react';
-import { INITIAL_NOTES, INITIAL_SPACES } from '../lib/store.js';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  subscribeNotes, subscribeSpaces,
+  createNote as fsCreateNote,
+  updateNote as fsUpdateNote,
+  deleteNote as fsDeleteNote,
+  createSpace as fsCreateSpace,
+  deleteSpace as fsDeleteSpace,
+  seedDemoNotes, seedDefaultSpaces,
+} from '../lib/firestoreService.js';
+import { htmlToMarkdown, markdownToHtml } from '../lib/store.js';
 
-let _nextId = 10;
+let _nextId = 100; // fallback for optimistic local IDs before Firestore resolves
 
-export function useNotes() {
-  const [notes, setNotes] = useState(INITIAL_NOTES);
-  const [spaces, setSpaces] = useState(INITIAL_SPACES);
+// Convert a raw Firestore note doc → web note shape (html field added for editor)
+function fromFirestore(doc) {
+  return {
+    id: doc._docId,
+    _docId: doc._docId,
+    title: doc.title || '',
+    html: markdownToHtml(doc.body || ''),
+    body: doc.body || '',
+    tags: doc.tags || [],
+    date: new Date(doc.updatedAt || Date.now()),
+    starred: doc.starred || false,
+    spaceId: doc.spaceId || null,
+    deleted: doc.deleted || false,
+  };
+}
 
-  const createNote = useCallback((partial = {}) => {
+export function useNotes(userId) {
+  const [notes,  setNotes]  = useState([]);
+  const [spaces, setSpaces] = useState([]);
+  const seededRef = useRef(false);
+
+  // Real-time Firestore listeners
+  useEffect(() => {
+    if (!userId) { setNotes([]); setSpaces([]); return; }
+
+    const unsubNotes  = subscribeNotes(userId, docs => {
+      const mapped = docs.map(fromFirestore);
+      setNotes(mapped);
+
+      // Seed demo content for brand-new users (no notes yet)
+      if (!seededRef.current && mapped.length === 0) {
+        seededRef.current = true;
+        seedDemoNotes(userId).catch(console.error);
+        seedDefaultSpaces(userId).catch(console.error);
+      }
+    });
+
+    const unsubSpaces = subscribeSpaces(userId, docs => {
+      setSpaces(docs.map(d => ({ id: d._docId, name: d.name, icon: d.icon })));
+    });
+
+    return () => { unsubNotes(); unsubSpaces(); };
+  }, [userId]);
+
+  // ── Note mutations ──
+
+  const createNote = useCallback(async (partial = {}) => {
+    const body = partial.body || '';
     const note = {
-      id: _nextId++,
-      title: '',
-      html: '<p></p>',
-      tags: [],
-      date: new Date(),
+      title: partial.title || '',
+      body,
+      tags: partial.tags || [],
       starred: false,
-      spaceId: null,
+      spaceId: partial.spaceId || null,
       deleted: false,
-      ...partial,
     };
-    setNotes(prev => [note, ...prev]);
-    return note;
+    const created = await fsCreateNote(note, userId);
+    return fromFirestore(created);
+  }, [userId]);
+
+  const updateNote = useCallback(async (id, patch) => {
+    // patch arrives with `html` from the editor — convert to `body` for Firestore
+    const firestorePatch = { ...patch };
+    if (patch.html !== undefined) {
+      firestorePatch.body = htmlToMarkdown(patch.html);
+      delete firestorePatch.html;
+    }
+    // Update local state optimistically
+    setNotes(prev => prev.map(n => {
+      if (n.id !== id) return n;
+      return { ...n, ...patch, date: new Date() };
+    }));
+    await fsUpdateNote(id, firestorePatch);
   }, []);
 
-  const updateNote = useCallback((id, patch) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, ...patch, date: new Date() } : n));
-  }, []);
-
-  const softDelete = useCallback((id) => {
+  const softDelete = useCallback(async (id) => {
     setNotes(prev => prev.map(n => n.id === id ? { ...n, deleted: true } : n));
+    await fsUpdateNote(id, { deleted: true });
   }, []);
 
-  const restoreNote = useCallback((id) => {
+  const restoreNote = useCallback(async (id) => {
     setNotes(prev => prev.map(n => n.id === id ? { ...n, deleted: false } : n));
+    await fsUpdateNote(id, { deleted: false });
   }, []);
 
-  const permanentDelete = useCallback((id) => {
+  const permanentDelete = useCallback(async (id) => {
     setNotes(prev => prev.filter(n => n.id !== id));
+    await fsDeleteNote(id);
   }, []);
 
-  const duplicateNote = useCallback((id) => {
+  const duplicateNote = useCallback(async (id) => {
     const orig = notes.find(n => n.id === id);
     if (!orig) return null;
-    const dupe = {
-      ...orig,
-      id: _nextId++,
-      title: orig.title + ' (copy)',
-      date: new Date(),
-      starred: false,
-    };
-    setNotes(prev => [dupe, ...prev]);
-    return dupe;
+    return createNote({ title: orig.title + ' (copy)', body: orig.body, tags: orig.tags, spaceId: orig.spaceId });
+  }, [notes, createNote]);
+
+  const toggleStar = useCallback(async (id) => {
+    const note = notes.find(n => n.id === id);
+    if (!note) return;
+    const starred = !note.starred;
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, starred } : n));
+    await fsUpdateNote(id, { starred });
   }, [notes]);
 
-  const toggleStar = useCallback((id) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, starred: !n.starred } : n));
+  const addTag = useCallback(async (id, tag) => {
+    const note = notes.find(n => n.id === id);
+    if (!note || note.tags.includes(tag)) return;
+    const tags = [...note.tags, tag];
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, tags } : n));
+    await fsUpdateNote(id, { tags });
+  }, [notes]);
+
+  const removeTag = useCallback(async (id, tag) => {
+    const note = notes.find(n => n.id === id);
+    if (!note) return;
+    const tags = note.tags.filter(t => t !== tag);
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, tags } : n));
+    await fsUpdateNote(id, { tags });
+  }, [notes]);
+
+  const moveToSpace = useCallback(async (id, spaceId) => {
+    const sid = spaceId || null;
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, spaceId: sid } : n));
+    await fsUpdateNote(id, { spaceId: sid });
   }, []);
 
-  const addTag = useCallback((id, tag) => {
-    setNotes(prev => prev.map(n => {
-      if (n.id !== id || n.tags.includes(tag)) return n;
-      return { ...n, tags: [...n.tags, tag] };
-    }));
-  }, []);
+  // ── Space mutations ──
 
-  const removeTag = useCallback((id, tag) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, tags: n.tags.filter(t => t !== tag) } : n));
-  }, []);
-
-  const moveToSpace = useCallback((id, spaceId) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, spaceId: spaceId || null } : n));
-  }, []);
-
-  const createSpace = useCallback((name) => {
+  const createSpace = useCallback(async (name) => {
     const icons = ['📁', '🗂', '📌', '💡', '🧪', '📝'];
-    const sp = { id: `s${_nextId++}`, name, icon: icons[spaces.length % icons.length] };
-    setSpaces(prev => [...prev, sp]);
+    const sp = { id: `s${_nextId++}_${userId}`, name, icon: icons[spaces.length % icons.length] };
+    await fsCreateSpace(sp, userId);
     return sp;
-  }, [spaces.length]);
+  }, [spaces.length, userId]);
 
-  const deleteSpace = useCallback((id) => {
+  const deleteSpace = useCallback(async (id) => {
     setNotes(prev => prev.map(n => n.spaceId === id ? { ...n, spaceId: null } : n));
     setSpaces(prev => prev.filter(s => s.id !== id));
-  }, []);
+    // Un-assign notes in Firestore
+    const affected = notes.filter(n => n.spaceId === id);
+    await Promise.all(affected.map(n => fsUpdateNote(n.id, { spaceId: null })));
+    await fsDeleteSpace(id);
+  }, [notes]);
 
   return {
     notes, spaces,

@@ -11,15 +11,26 @@ import {
 } from './components/Panels.jsx';
 import { useNotes }  from './hooks/useNotes.js';
 import { useToast }  from './hooks/useToast.js';
+import { onAuthChanged, signOut } from './lib/firebaseAuth.js';
 import { htmlToMarkdown, downloadFile } from './lib/store.js';
 import './styles/globals.css';
 
 export default function App() {
   const toast = useToast();
 
-  // ── Auth ──
+  // ── Auth — driven by Firebase onAuthStateChanged ──
   const [user,       setUser]       = useState(null);
   const [authed,     setAuthed]     = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onAuthChanged(u => {
+      setUser(u);
+      setAuthed(!!u);
+      setAuthLoading(false);
+    });
+    return unsub;
+  }, []);
 
   // ── Theme ──
   const [dark,       setDark]       = useState(false);
@@ -28,13 +39,13 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileView, setMobileView] = useState('list'); // 'sidebar' | 'list' | 'editor'
 
-  // ── Notes state ──
+  // ── Notes state — Firestore-backed, keyed to current user ──
   const {
     notes, spaces,
     createNote, updateNote, softDelete, restoreNote, duplicateNote,
     toggleStar, addTag, removeTag, moveToSpace,
     createSpace, deleteSpace,
-  } = useNotes();
+  } = useNotes(user?.uid);
 
   const [activeNoteId, setActiveNoteId] = useState(notes[0]?.id || null);
   const [filter,       setFilter]       = useState('all');
@@ -137,8 +148,24 @@ export default function App() {
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
   // ── Auth ──
+  if (authLoading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--text-tertiary)', fontSize: 13 }}>
+        Loading…
+      </div>
+    );
+  }
   if (!authed) {
-    return <AuthScreen onAuth={u => { setUser(u); setAuthed(true); openPanel('onboarding'); toast(`Welcome, ${u.name.split(' ')[0]}! 👋`); }} />;
+    return (
+      <AuthScreen
+        onAuth={u => {
+          setUser(u);
+          setAuthed(true);
+          openPanel('onboarding');
+          toast(`Welcome, ${u.name.split(' ')[0]}! 👋`);
+        }}
+      />
+    );
   }
 
   return (
@@ -149,7 +176,7 @@ export default function App() {
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={() => setSidebarCollapsed(v => !v)}
         user={user}
-        onSignOut={() => { setAuthed(false); setUser(null); }}
+        onSignOut={() => signOut()}
         onOpenGraph={() => openPanel('graph')}
         onOpenSketch={() => openPanel('sketch')}
         onOpenGamif={() => openPanel('gamif')}
@@ -161,13 +188,14 @@ export default function App() {
         onSearch={q => { setSearchQuery(q); setFilter('all'); }}
       />
 
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
         <Sidebar
           collapsed={sidebarCollapsed}
+          mobileActive={mobileView === 'sidebar'}
           notes={notes}
           spaces={spaces}
           filter={filter}
-          onSetFilter={f => { setFilter(f); setSearchQuery(''); }}
+          onSetFilter={f => { setFilter(f); setSearchQuery(''); setMobileView('list'); }}
           activeNoteId={activeNoteId}
           onOpenNote={handleOpenNote}
           onOpenSpaceManager={() => {/* handled in sidebar */}}
@@ -179,6 +207,7 @@ export default function App() {
           filter={filter}
           searchQuery={searchQuery}
           activeNoteId={activeNoteId}
+          mobileActive={mobileView === 'list'}
           onOpenNote={handleOpenNote}
           onNewNote={handleNewNote}
           onDuplicate={handleDuplicate}
@@ -190,6 +219,7 @@ export default function App() {
         <Editor
           note={activeNote}
           notes={notes}
+          mobileActive={mobileView === 'editor'}
           onUpdate={updateNote}
           onToggleStar={toggleStar}
           onAddTag={addTag}

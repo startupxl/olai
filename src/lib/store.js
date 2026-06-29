@@ -196,6 +196,52 @@ export function getLinks(html) {
   return [...div.querySelectorAll('.wikilink')].map(el => +el.dataset.target).filter(Boolean);
 }
 
+// Convert markdown (stored in Firestore) → HTML (used by the web editor)
+export function markdownToHtml(md) {
+  if (!md) return '<p></p>';
+  let html = md
+    // Headings
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // Bold + italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Strikethrough
+    .replace(/~~(.+?)~~/g, '<s>$1</s>')
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Blockquotes
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    // Wikilinks — rendered as clickable spans the editor can recognise
+    .replace(/\[\[(.+?)\]\]/g, '<span class="wikilink" data-title="$1">[[$1]]</span>')
+    // Markdown links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    // Unordered lists (wrap consecutive - lines)
+    .replace(/((?:^- .+\n?)+)/gm, (block) => {
+      const items = block.trim().split('\n').map(l => `<li>${l.replace(/^- /, '')}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    })
+    // Ordered lists
+    .replace(/((?:^\d+\. .+\n?)+)/gm, (block) => {
+      const items = block.trim().split('\n').map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+      return `<ol>${items}</ol>`;
+    })
+    // HR
+    .replace(/^---$/gm, '<hr />')
+    // Paragraphs — wrap remaining non-tagged lines
+    .split('\n\n')
+    .map(para => {
+      para = para.trim();
+      if (!para) return '';
+      if (/^<(h[1-6]|ul|ol|blockquote|hr|pre)/.test(para)) return para;
+      return `<p>${para.replace(/\n/g, '<br />')}</p>`;
+    })
+    .join('');
+  return html || '<p></p>';
+}
+
 export function wordCount(html) {
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   return text ? text.split(/\s+/).length : 0;

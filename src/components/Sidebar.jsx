@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './Sidebar.css';
 
 export default function Sidebar({
-  collapsed, notes, spaces, filter, onSetFilter,
+  collapsed, mobileActive, notes, spaces, filter, onSetFilter,
   activeNoteId, onOpenNote, onOpenSpaceManager,
 }) {
   const [activeSpace, setActiveSpace] = useState(null);
@@ -20,7 +20,7 @@ export default function Sidebar({
   }
 
   return (
-    <nav className={`app-sidebar${collapsed ? ' collapsed' : ''}`} aria-label="Sidebar">
+    <nav className={`app-sidebar${collapsed ? ' collapsed' : ''}${mobileActive ? ' mobile-active' : ''}`} aria-label="Sidebar">
       <div className="sb-scroll">
         {/* Library */}
         <div className="sb-section">
