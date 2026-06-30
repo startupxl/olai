@@ -5,7 +5,7 @@ import './NoteList.css';
 
 export default function NoteList({
   notes, spaces, filter, searchQuery, activeNoteId, mobileActive,
-  onOpenNote, onNewNote, onDuplicate, onDelete, onToggleStar, onMoveToSpace,
+  onOpenNote, onNewNote, onTemplates, onDuplicate, onDelete, onToggleStar, onMoveToSpace,
   onToggleSidebar, onSearch, isPro = false,
 }) {
   const [ctx, setCtx] = useState({ open: false, x: 0, y: 0, noteId: null });
@@ -50,6 +50,9 @@ export default function NoteList({
             <i className="ti ti-layout-sidebar" />
           </button>
           <span className="nl-title">{title}</span>
+          <button className="nl-template-btn" onClick={onTemplates} data-tip="Templates" aria-label="Templates">
+            <i className="ti ti-layout-grid" />
+          </button>
           <button className="nl-new-btn" onClick={onNewNote} data-tip="New note (⌘N)" aria-label="New note">
             <i className="ti ti-plus" />
           </button>

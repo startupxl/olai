@@ -16,6 +16,7 @@ import { useToast }  from './hooks/useToast.js';
 import { onAuthChanged, signOut, completeMagicLinkSignIn } from './lib/firebaseAuth.js';
 import { getOrCreateProfile, trackReferralOnSignup, updatePlan } from './lib/firestoreService.js';
 import { htmlToMarkdown, downloadFile } from './lib/store.js';
+import TemplateGallery from './components/TemplateGallery.jsx';
 import PrivacyPage   from './pages/PrivacyPage.jsx';
 import TermsPage     from './pages/TermsPage.jsx';
 import NotFoundPage  from './pages/NotFoundPage.jsx';
@@ -117,6 +118,8 @@ export default function App() {
   const [filter,       setFilter]       = useState('all');
   const [searchQuery,  setSearchQuery]  = useState('');
 
+  const [showTemplates, setShowTemplates] = useState(false);
+
   // ── Panels ──
   const [panels, setPanels] = useState({
     palette: false, graph: false, sketch: false,
@@ -153,6 +156,12 @@ export default function App() {
   // ── Actions ──
   function handleNewNote() {
     const n = createNote();
+    setActiveNoteId(n.id);
+    if (window.innerWidth <= 640) setMobileView('editor');
+  }
+
+  async function handleTemplateSelect({ title, body, tags }) {
+    const n = await createNote({ title, body, tags });
     setActiveNoteId(n.id);
     if (window.innerWidth <= 640) setMobileView('editor');
   }
@@ -283,6 +292,7 @@ export default function App() {
           mobileActive={mobileView === 'list'}
           onOpenNote={handleOpenNote}
           onNewNote={handleNewNote}
+          onTemplates={() => setShowTemplates(true)}
           onDuplicate={handleDuplicate}
           onDelete={handleDelete}
           onToggleStar={toggleStar}
@@ -331,6 +341,12 @@ export default function App() {
         onClose={() => closePanel('palette')}
         onCommand={handlePaletteCommand}
       />
+      {showTemplates && (
+        <TemplateGallery
+          onSelect={handleTemplateSelect}
+          onClose={() => setShowTemplates(false)}
+        />
+      )}
       <GraphPanel
         open={panels.graph}
         onClose={() => closePanel('graph')}
