@@ -13,7 +13,7 @@ import {
 } from './components/Panels.jsx';
 import { useNotes }  from './hooks/useNotes.js';
 import { useToast }  from './hooks/useToast.js';
-import { onAuthChanged, signOut } from './lib/firebaseAuth.js';
+import { onAuthChanged, signOut, completeMagicLinkSignIn } from './lib/firebaseAuth.js';
 import { getOrCreateProfile, trackReferralOnSignup, updatePlan } from './lib/firestoreService.js';
 import { htmlToMarkdown, downloadFile } from './lib/store.js';
 import PrivacyPage   from './pages/PrivacyPage.jsx';
@@ -40,6 +40,11 @@ export default function App() {
     window.history.replaceState(null, '', '/');
   }
   if (path !== '/')        return <NotFoundPage />;
+
+  // ── Magic link sign-in completion ──
+  useEffect(() => {
+    completeMagicLinkSignIn().catch(() => {});
+  }, []);
 
   // ── Auth — driven by Firebase onAuthStateChanged ──
   const [user,       setUser]       = useState(null);
@@ -246,8 +251,7 @@ export default function App() {
         onOpenPalette={() => openPanel('palette')}
         onOpenProfile={() => openPanel('profile')}
         onOpenSubscription={() => openPanel('subscription')}
-        searchQuery={searchQuery}
-        onSearch={q => { setSearchQuery(q); setFilter('all'); }}
+        onHome={() => { setFilter('all'); setSearchQuery(''); if (window.innerWidth <= 640) setMobileView('list'); }}
       />
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
@@ -278,6 +282,7 @@ export default function App() {
           onToggleStar={toggleStar}
           onMoveToSpace={moveToSpace}
           onToggleSidebar={() => setSidebarCollapsed(v => !v)}
+          onSearch={q => { setSearchQuery(q); setFilter('all'); }}
           isPro={userPlan === 'pro'}
         />
 

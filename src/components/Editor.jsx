@@ -265,15 +265,20 @@ export default function Editor({
             placeholder="tag…"
             value={tagInput}
             onChange={e => setTagInput(e.target.value)}
+            maxLength={32}
             onKeyDown={e => {
               if (e.key === 'Enter') {
-                const t = tagInput.trim().toLowerCase().replace(/\s+/g, '-');
+                const t = tagInput.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').slice(0, 32);
                 if (t) onAddTag(note.id, t);
                 setTagInput(''); setShowTagInput(false);
               }
               if (e.key === 'Escape') { setTagInput(''); setShowTagInput(false); }
             }}
-            onBlur={() => { if (tagInput.trim()) onAddTag(note.id, tagInput.trim().toLowerCase()); setTagInput(''); setShowTagInput(false); }}
+            onBlur={() => {
+              const t = tagInput.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').slice(0, 32);
+              if (t) onAddTag(note.id, t);
+              setTagInput(''); setShowTagInput(false);
+            }}
           />
         ) : (
           <button className="ed-tag-add" onClick={() => setShowTagInput(true)}>+ tag</button>

@@ -6,7 +6,7 @@ import './NoteList.css';
 export default function NoteList({
   notes, spaces, filter, searchQuery, activeNoteId, mobileActive,
   onOpenNote, onNewNote, onDuplicate, onDelete, onToggleStar, onMoveToSpace,
-  onToggleSidebar, isPro = false,
+  onToggleSidebar, onSearch, isPro = false,
 }) {
   const [ctx, setCtx] = useState({ open: false, x: 0, y: 0, noteId: null });
 
@@ -28,9 +28,11 @@ export default function NoteList({
   const ctxNote = notes.find(n => n.id === ctx.noteId);
 
   function hl(text) {
-    if (!searchQuery) return text;
+    // Escape HTML in the source text first to prevent XSS via note content
+    const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    if (!searchQuery) return escaped;
     const re = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(re, '<mark>$1</mark>');
+    return escaped.replace(re, '<mark>$1</mark>');
   }
 
   const title =
@@ -51,6 +53,23 @@ export default function NoteList({
           <button className="nl-new-btn" onClick={onNewNote} data-tip="New note (⌘N)" aria-label="New note">
             <i className="ti ti-plus" />
           </button>
+        </div>
+
+        <div className="nl-search-wrap">
+          <i className="ti ti-search nl-search-ic" />
+          <input
+            className="nl-search"
+            value={searchQuery}
+            onChange={e => onSearch(e.target.value)}
+            placeholder="Search notes…"
+            autoComplete="off"
+            aria-label="Search notes"
+          />
+          {searchQuery && (
+            <button className="nl-search-clear" onClick={() => onSearch('')} aria-label="Clear search">
+              <i className="ti ti-x" />
+            </button>
+          )}
         </div>
 
         <div className="nl-scroll">

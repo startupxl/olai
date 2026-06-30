@@ -8,48 +8,41 @@ export default function Header({
   onOpenGraph, onOpenSketch, onOpenGamif,
   onOpenIntegrations, onOpenGdpr, onOpenPalette,
   onOpenProfile, onOpenSubscription,
-  searchQuery, onSearch,
+  onHome,
 }) {
   const [ddOpen, setDdOpen] = useState(false);
 
   return (
     <header className="app-header">
-      <div className="app-wordmark">
+      <button
+        className="app-wordmark"
+        onClick={onHome}
+        aria-label="Go to home"
+        data-tip="Home"
+      >
         <img src="/logo.svg" alt="Olai Notes" className="app-logo-mark" />
         <span>Olai Notes</span>
-      </div>
-
-      <div className="hdr-search-wrap">
-        <input
-          className="hdr-search"
-          value={searchQuery}
-          onChange={e => onSearch(e.target.value)}
-          placeholder="Search notes…"
-          autoComplete="off"
-          aria-label="Search notes"
-        />
-        <i className="ti ti-search hdr-search-ic" />
-      </div>
+      </button>
 
       <div className="hdr-right">
         <span className="hdr-sync-dot" data-tip="Synced to cloud" />
 
-        <button className="hdr-icon-btn" onClick={onOpenSketch} data-tip="Sketch canvas">
+        <button className="hdr-icon-btn" onClick={onOpenSketch} data-tip="Sketch canvas" aria-label="Open sketch canvas">
           <i className="ti ti-pencil" />
         </button>
-        <button className="hdr-icon-btn" onClick={onOpenGamif} data-tip="Achievements & referrals">
+        <button className="hdr-icon-btn" onClick={onOpenGamif} data-tip="Achievements & referrals" aria-label="Open achievements">
           <i className="ti ti-trophy" />
         </button>
-        <button className="hdr-icon-btn" onClick={onOpenIntegrations} data-tip="Integrations">
+        <button className="hdr-icon-btn" onClick={onOpenIntegrations} data-tip="Integrations" aria-label="Open integrations">
           <i className="ti ti-plug" />
         </button>
-        <button className="hdr-icon-btn" onClick={onOpenGdpr} data-tip="Privacy & data">
+        <button className="hdr-icon-btn" onClick={onOpenGdpr} data-tip="Privacy & data" aria-label="Open privacy settings">
           <i className="ti ti-lock" />
         </button>
-        <button className="hdr-icon-btn" onClick={onOpenGraph} data-tip="Knowledge graph">
+        <button className="hdr-icon-btn" onClick={onOpenGraph} data-tip="Knowledge graph" aria-label="Open knowledge graph">
           <i className="ti ti-topology-star" />
         </button>
-        <button className="hdr-icon-btn" onClick={onToggleDark} data-tip={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
+        <button className="hdr-icon-btn" onClick={onToggleDark} data-tip={dark ? 'Switch to light mode' : 'Switch to dark mode'} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
           <i className={`ti ${dark ? 'ti-sun' : 'ti-moon'}`} />
         </button>
 

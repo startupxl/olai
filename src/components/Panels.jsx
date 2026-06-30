@@ -345,89 +345,6 @@ export function IntegrationsPanel({ open, onClose, toast }) {
   );
 }
 
-/* ═══════════════════════════ ADMIN PANEL ═══════════════════════════ */
-export function AdminPanel({ open, onClose, notes, toast, isAdmin = false }) {
-  const [tab, setTab] = useState('overview');
-  const [ssoOn, setSsoOn] = useState(false);
-
-  const alive = notes.filter(n => !n.deleted);
-
-  return (
-    <Overlay open={open} onClose={onClose} wide>
-      <PanelHeader title="Admin panel" onClose={onClose} />
-      {!isAdmin ? (
-        <div style={{ padding: '40px 24px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🔒</div>
-          <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', marginBottom: 8 }}>Admin access required</div>
-          <div style={{ fontSize: 12, lineHeight: 1.6 }}>You need admin privileges to view this panel.<br />Contact your workspace administrator for access.</div>
-        </div>
-      ) : (
-        <>
-          <div className="admin-tabs">
-            {['overview','members','sso','audit'].map(t => (
-              <button key={t} className={`admin-tab${tab === t ? ' active' : ''}`} onClick={() => setTab(t)}>
-                {t === 'sso' ? 'SSO / SAML' : t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div className="admin-body">
-            {tab === 'overview' && (
-              <div className="admin-pane">
-                <div className="admin-stats">
-                  {[['Notes', alive.length], ['Storage', 'N/A']].map(([l,v]) => (
-                    <div key={l} className="admin-stat">
-                      <div className="admin-stat-val">{v}</div>
-                      <div className="admin-stat-lbl">{l}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="admin-plan-row">
-                  <div>Contact support to manage your plan.</div>
-                  <a href="mailto:support@olainotes.com" className="btn-primary" style={{ fontSize: 11, padding: '5px 10px', textDecoration: 'none' }}>Contact support</a>
-                </div>
-              </div>
-            )}
-            {tab === 'members' && (
-              <div className="admin-pane">
-                <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '16px 0' }}>Member management coming soon.</p>
-              </div>
-            )}
-            {tab === 'sso' && (
-              <div className="admin-pane">
-                <div className="admin-sso-row">
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 500 }}>SAML 2.0 SSO</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>Single sign-on via your identity provider</div>
-                  </div>
-                  <button className={`toggle${ssoOn ? ' on' : ''}`} onClick={() => { setSsoOn(v => !v); toast('SSO ' + (!ssoOn ? 'enabled' : 'disabled')); }} />
-                </div>
-                {['Identity Provider Entity ID','SSO URL'].map(label => (
-                  <div key={label} className="admin-field">
-                    <label className="admin-field-label">{label}</label>
-                    <input className="field-input" placeholder={`https://idp.example.com/${label.includes('URL') ? 'sso/saml' : 'metadata'}`} />
-                  </div>
-                ))}
-                <div className="admin-field">
-                  <label className="admin-field-label">X.509 Certificate</label>
-                  <textarea className="field-input" style={{ height: 70, resize: 'none' }} placeholder="-----BEGIN CERTIFICATE-----…" />
-                </div>
-                <button className="btn-primary" style={{ fontSize: 12 }} onClick={() => toast('SSO configuration saved')}>
-                  Save configuration
-                </button>
-              </div>
-            )}
-            {tab === 'audit' && (
-              <div className="admin-pane">
-                <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '16px 0' }}>Audit log coming soon.</p>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-    </Overlay>
-  );
-}
-
 /* ═══════════════════════════ GDPR PANEL ═══════════════════════════ */
 export function GdprPanel({ open, onClose, notes, toast }) {
   const [toggs, setToggs] = useState({ analytics: true, crash: true, marketing: false });
@@ -784,9 +701,6 @@ export function AuthScreen({ onAuth }) {
             <div className="auth-form-title">Check your inbox</div>
             <div className="auth-form-sub">We sent a sign-in link to<br /><strong>{magicEmail}</strong><br />It expires in 15 minutes.</div>
             <button className="btn-secondary" style={{ width: '100%', marginTop: 16 }} onClick={() => setScreen('magic')}>← Use a different email</button>
-            <button className="btn-secondary" style={{ width: '100%', marginTop: 8 }} onClick={() => onAuth({ name: magicEmail.split('@')[0], email: magicEmail, plan: 'Free', initials: magicEmail[0].toUpperCase(), color: '#2D6A4F' })}>
-              Continue (demo skip) →
-            </button>
           </div>
         )}
 

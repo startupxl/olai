@@ -148,12 +148,13 @@ export function useNotes(userId) {
   }, [spaces.length, userId]);
 
   const deleteSpace = useCallback(async (id) => {
-    setNotes(prev => prev.map(n => n.spaceId === id ? { ...n, spaceId: null } : n));
-    setSpaces(prev => prev.filter(s => s.id !== id));
-    // Un-assign notes in Firestore
+    // Un-assign notes in Firestore first — only delete space if all writes succeed
     const affected = notes.filter(n => n.spaceId === id);
     await Promise.all(affected.map(n => fsUpdateNote(n.id, { spaceId: null })));
     await fsDeleteSpace(id);
+    // Update local state after successful Firestore writes
+    setNotes(prev => prev.map(n => n.spaceId === id ? { ...n, spaceId: null } : n));
+    setSpaces(prev => prev.filter(s => s.id !== id));
   }, [notes]);
 
   return {

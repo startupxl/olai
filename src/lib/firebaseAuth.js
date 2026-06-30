@@ -5,6 +5,8 @@ import {
   GoogleAuthProvider,
   sendPasswordResetEmail,
   sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
   updateProfile,
   onAuthStateChanged,
   signOut as firebaseSignOut,
@@ -43,6 +45,18 @@ export async function signUpWithEmail(name, email, password) {
 
 export async function signInWithGoogle() {
   const result = await signInWithPopup(auth, googleProvider);
+  return userFromFirebase(result.user);
+}
+
+export async function completeMagicLinkSignIn() {
+  if (!isSignInWithEmailLink(auth, window.location.href)) return null;
+  let email = window.localStorage.getItem('emailForSignIn');
+  if (!email) email = window.prompt('Please confirm your email to sign in:');
+  if (!email) return null;
+  const result = await signInWithEmailLink(auth, email, window.location.href);
+  window.localStorage.removeItem('emailForSignIn');
+  // Clean URL
+  window.history.replaceState(null, '', '/');
   return userFromFirebase(result.user);
 }
 

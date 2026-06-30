@@ -36,6 +36,42 @@
 }
 .nl-new-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 
+.nl-search-wrap {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.nl-search-ic {
+  position: absolute; left: 18px;
+  color: var(--text-tertiary); font-size: 12px; pointer-events: none;
+}
+.nl-search {
+  width: 100%; height: 26px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 26px 0 26px;
+  font-size: 12px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  outline: none;
+  transition: border-color var(--ease-hover);
+}
+.nl-search:focus { border-color: var(--accent); }
+.nl-search::placeholder { color: var(--text-tertiary); }
+.nl-search-clear {
+  position: absolute; right: 17px;
+  width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--text-tertiary); border: none; border-radius: 50%;
+  color: var(--bg-primary); font-size: 9px; cursor: pointer;
+  opacity: 0.7;
+}
+.nl-search-clear:hover { opacity: 1; }
+
 .nl-scroll { flex: 1; overflow-y: auto; }
 
 .nl-group {

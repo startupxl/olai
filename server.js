@@ -19,6 +19,23 @@ import { fileURLToPath } from 'url';
 import https      from 'https';
 import admin      from 'firebase-admin';
 
+// Simple in-memory rate limiter (resets on server restart)
+function createRateLimiter({ windowMs, max }) {
+  const hits = new Map();
+  return (req, res, next) => {
+    const key = req.ip || 'unknown';
+    const now = Date.now();
+    const entry = hits.get(key) || { count: 0, start: now };
+    if (now - entry.start > windowMs) { entry.count = 0; entry.start = now; }
+    entry.count++;
+    hits.set(key, entry);
+    if (entry.count > max) return res.status(429).json({ error: 'Too many requests' });
+    next();
+  };
+}
+const webhookLimiter        = createRateLimiter({ windowMs: 60_000, max: 30 });
+const verifySubscriptionLimiter = createRateLimiter({ windowMs: 60_000, max: 10 });
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app       = express();
 const PORT      = process.env.PORT || 3000;
@@ -136,11 +153,12 @@ app.use((_req, res, next) => {
 });
 
 // ── Subscription status check ─────────────────────────────────────────────────
+
 // Called by the client on login when planCancelled:true — if PayPal says the
 // subscription is still ACTIVE, the client restores the plan itself via updatePlan().
-app.use('/api/verify-subscription', express.json());
+app.use('/api/verify-subscription', express.json({ limit: '4kb' }));
 
-app.post('/api/verify-subscription', async (req, res) => {
+app.post('/api/verify-subscription', verifySubscriptionLimiter, async (req, res) => {
   const { subscriptionId } = req.body || {};
   if (!subscriptionId) return res.status(400).json({ error: 'Missing subscriptionId' });
   if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
@@ -162,9 +180,9 @@ app.post('/api/verify-subscription', async (req, res) => {
 });
 
 // ── Webhook handler ───────────────────────────────────────────────────────────
-app.use('/api/webhooks/paypal', express.raw({ type: 'application/json' }));
+app.use('/api/webhooks/paypal', express.raw({ type: 'application/json', limit: '64kb' }));
 
-app.post('/api/webhooks/paypal', async (req, res) => {
+app.post('/api/webhooks/paypal', webhookLimiter, async (req, res) => {
   try {
     const rawBody = req.body.toString();
     const event   = JSON.parse(rawBody);

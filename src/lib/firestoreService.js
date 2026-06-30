@@ -71,8 +71,8 @@ const REFERRAL_TIERS = [
 ];
 
 export async function getReferralCount(userId) {
-  const { getDocs, query: fsQuery, collection: fsCol, where: fsWhere } = await import('firebase/firestore');
-  const snap = await getDocs(fsQuery(fsCol(db, 'profiles'), fsWhere('referredBy', '==', userId)));
+  const { getDocs, query: fsQuery, collection: fsCol, where: fsWhere, limit: fsLimit } = await import('firebase/firestore');
+  const snap = await getDocs(fsQuery(fsCol(db, 'profiles'), fsWhere('referredBy', '==', userId), fsLimit(100)));
   return snap.size;
 }
 
