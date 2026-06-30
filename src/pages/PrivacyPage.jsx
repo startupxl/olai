@@ -63,7 +63,7 @@ export default function PrivacyPage() {
           <li><strong>Portability</strong> — export your notes in JSON or HTML format.</li>
           <li><strong>Objection</strong> — opt out of analytics and marketing communications.</li>
         </ul>
-        <p style={s.p}>To exercise any right, email <a href="mailto:privacy@olainotes.com" style={{ color: 'var(--accent)' }}>privacy@olainotes.com</a> or use the Privacy &amp; data panel in the app.</p>
+        <p style={s.p}>To exercise any right, email <a href="mailto:help@olainotes.com" style={{ color: 'var(--accent)' }}>help@olainotes.com</a> or use the Privacy &amp; data panel in the app.</p>
 
         <h2 style={s.h2}>6. Data retention</h2>
         <p style={s.p}>We retain your data for as long as your account is active. When you delete your account, your notes and personal data are permanently removed within 30 days.</p>
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
         <p style={s.p}>We may update this policy from time to time. Material changes will be communicated via email or an in-app notice. Continued use after changes constitutes acceptance.</p>
 
         <h2 style={s.h2}>9. Contact</h2>
-        <p style={s.p}>Questions about this policy? Email <a href="mailto:privacy@olainotes.com" style={{ color: 'var(--accent)' }}>privacy@olainotes.com</a>.</p>
+        <p style={s.p}>Questions about this policy? Email <a href="mailto:help@olainotes.com" style={{ color: 'var(--accent)' }}>help@olainotes.com</a>.</p>
 
         <hr style={s.hr} />
         <p style={s.footer}>© {new Date().getFullYear()} Olai Notes · <a href="/terms" style={{ color: 'inherit' }}>Terms of Service</a></p>
