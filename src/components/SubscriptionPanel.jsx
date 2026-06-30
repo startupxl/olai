@@ -51,9 +51,10 @@ export default function SubscriptionPanel({ open, onClose, user, currentPlan, to
 
     const planId = billing === 'annual' ? PLAN_ID_ANNUAL : PLAN_ID_MONTHLY;
 
-    btnRef.current.innerHTML = ''; // clear previous button
+    btnRef.current.innerHTML = '';
     window.paypal.Buttons({
-      style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
+      // Render as a minimal, borderless button — it sits behind our custom button (opacity 0.01)
+      style: { shape: 'rect', color: 'black', layout: 'vertical', label: 'subscribe', height: 50 },
       createSubscription: (_data, actions) =>
         actions.subscription.create({ plan_id: planId }),
       onApprove: async (data) => {
@@ -61,10 +62,10 @@ export default function SubscriptionPanel({ open, onClose, user, currentPlan, to
         try {
           await updatePlan(user.uid, 'pro', data.subscriptionID, billing, Date.now());
           onPlanUpdated('pro');
-          toast(`Upgraded to Olai Pro! Ads removed. Thank you 🎉`);
+          toast(`You're now on Olai Pro — thank you! 🎉`);
           onClose();
         } catch {
-          toast('Subscription approved but profile update failed — contact support@olainotes.com', 'warn');
+          toast('Payment received but profile update failed — contact support@olainotes.com', 'warn');
         } finally {
           setProcessing(false);
         }
@@ -180,21 +181,43 @@ export default function SubscriptionPanel({ open, onClose, user, currentPlan, to
                 </div>
               </div>
 
-              {/* PayPal button */}
+              {/* Subscribe CTA */}
               {processing ? (
-                <div style={{ textAlign: 'center', padding: 16, fontSize: 13, color: 'var(--text-tertiary)' }}>Activating Olai Pro…</div>
+                <div style={{ height: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--accent)', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#fff', letterSpacing: '0.01em' }}>
+                  Activating Pro…
+                </div>
               ) : !configured ? (
                 <div style={{ border: '1px dashed var(--border)', borderRadius: 6, padding: 16, textAlign: 'center' }}>
-                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>PayPal not configured yet</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
-                    Set VITE_PAYPAL_CLIENT_ID, VITE_PAYPAL_PLAN_ID_MONTHLY,<br />VITE_PAYPAL_PLAN_ID_ANNUAL in environment variables.
-                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Payment not configured — set env vars on server</div>
                 </div>
               ) : (
-                <>
-                  {!sdkReady && <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-tertiary)', padding: '12px 0' }}>Loading PayPal…</div>}
-                  <div ref={btnRef} style={{ display: sdkReady ? 'block' : 'none' }} />
-                </>
+                <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
+                  {/* Visible custom button — pointer-events disabled so clicks pass through to PayPal */}
+                  <button style={{
+                    width: '100%', height: 50,
+                    background: sdkReady ? 'var(--accent)' : 'var(--bg-secondary)',
+                    color: sdkReady ? '#fff' : 'var(--text-tertiary)',
+                    border: 'none', borderRadius: 8, cursor: sdkReady ? 'pointer' : 'default',
+                    fontSize: 14, fontWeight: 600, letterSpacing: '0.01em',
+                    fontFamily: 'var(--font-ui)',
+                    pointerEvents: 'none', // clicks fall through to PayPal iframe
+                    transition: 'background 0.15s',
+                  }}>
+                    {sdkReady
+                      ? billing === 'annual'
+                        ? `Start Pro — $${annualPrice}/year`
+                        : `Start Pro — $${monthlyPrice}/month`
+                      : 'Loading…'}
+                  </button>
+
+                  {/* PayPal button overlaid — nearly invisible but receives all clicks */}
+                  <div ref={btnRef} style={{
+                    position: 'absolute', inset: 0,
+                    opacity: 0.01,
+                    zIndex: 10,
+                    display: sdkReady ? 'block' : 'none',
+                  }} />
+                </div>
               )}
 
               {/* Policy notice */}

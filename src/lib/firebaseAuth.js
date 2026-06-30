@@ -61,8 +61,13 @@ export async function completeMagicLinkSignIn() {
 }
 
 export async function sendMagicLink(email) {
+  // Always complete sign-in on the app subdomain, even when this is called
+  // from the marketing site (olainotes.com).
+  const appOrigin = window.location.hostname === 'localhost'
+    ? window.location.origin
+    : 'https://app.olainotes.com';
   const actionCodeSettings = {
-    url: `${window.location.origin}/?emailLink=1`,
+    url: `${appOrigin}/`,
     handleCodeInApp: true,
   };
   await sendSignInLinkToEmail(auth, email, actionCodeSettings);

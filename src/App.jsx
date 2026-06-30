@@ -33,10 +33,16 @@ export default function App() {
   }, []);
   if (path === '/privacy') return <PrivacyPage />;
   if (path === '/terms')   return <TermsPage />;
-  // Referral link — save code then redirect to signup
+  // Referral link via path (legacy) — save code then clean URL
   if (path.startsWith('/r/')) {
     const refCode = path.slice(3);
     if (refCode) localStorage.setItem('olai-ref', refCode);
+    window.history.replaceState(null, '', '/');
+  }
+  // Referral link via query param — used when landing page redirects to app.olainotes.com?ref=xyz
+  const _refParam = new URLSearchParams(window.location.search).get('ref');
+  if (_refParam) {
+    localStorage.setItem('olai-ref', _refParam);
     window.history.replaceState(null, '', '/');
   }
   if (path !== '/')        return <NotFoundPage />;

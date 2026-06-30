@@ -104,6 +104,19 @@ async function updateProfile(userId, patch) {
   await db.collection('profiles').doc(userId).set(patch, { merge: true });
 }
 
+// ── CORS — allow the marketing site to call /api/* ───────────────────────────
+app.use('/api', (req, res, next) => {
+  const allowed = ['https://olainotes.com', 'https://www.olainotes.com'];
+  const origin = req.headers.origin;
+  if (allowed.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 // ── Security headers ──────────────────────────────────────────────────────────
 app.use((_req, res, next) => {
   // HSTS — force HTTPS for 1 year (only effective once served over TLS)
