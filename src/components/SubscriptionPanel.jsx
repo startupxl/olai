@@ -65,7 +65,7 @@ export default function SubscriptionPanel({ open, onClose, user, currentPlan, to
           toast(`You're now on Olai Pro — thank you! 🎉`);
           onClose();
         } catch {
-          toast('Payment received but profile update failed — contact support@olainotes.com', 'warn');
+          toast('Payment received but profile update failed — contact help@olainotes.com', 'warn');
         } finally {
           setProcessing(false);
         }

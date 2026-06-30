@@ -36,7 +36,7 @@ export default function TermsPage() {
           <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
           <li>You must provide accurate information when creating an account.</li>
           <li>You are responsible for all activity that occurs under your account.</li>
-          <li>Notify us immediately of any unauthorised use at <a href="mailto:security@olainotes.com" style={{ color: 'var(--accent)' }}>security@olainotes.com</a>.</li>
+          <li>Notify us immediately of any unauthorised use at <a href="mailto:help@olainotes.com" style={{ color: 'var(--accent)' }}>help@olainotes.com</a>.</li>
         </ul>
 
         <h2 style={s.h2}>4. Acceptable use</h2>
@@ -71,7 +71,7 @@ export default function TermsPage() {
         <p style={s.p}>We may update these Terms from time to time. We will notify you of material changes by email or in-app notice at least 14 days before they take effect. Continued use after changes constitutes acceptance.</p>
 
         <h2 style={s.h2}>12. Contact</h2>
-        <p style={s.p}>Questions about these Terms? Email <a href="mailto:legal@olainotes.com" style={{ color: 'var(--accent)' }}>legal@olainotes.com</a>.</p>
+        <p style={s.p}>Questions about these Terms? Email <a href="mailto:help@olainotes.com" style={{ color: 'var(--accent)' }}>help@olainotes.com</a>.</p>
 
         <hr style={s.hr} />
         <p style={s.footer}>© {new Date().getFullYear()} Olai Notes · <a href="/privacy" style={{ color: 'inherit' }}>Privacy Policy</a></p>
